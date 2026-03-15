@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create:*)",
+      "Bash(mv frontend/README frontend_README_backup)",
+      "Bash(rm -rf frontend)"
+    ]
+  }
+}
