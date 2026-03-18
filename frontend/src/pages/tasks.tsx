@@ -29,7 +29,7 @@ export function TasksPage() {
   })
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-tour="tasks-page">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Мониторинг задач</h1>
         <Button onClick={() => navigate('/tasks/new')} className="gap-2">
@@ -37,7 +37,7 @@ export function TasksPage() {
         </Button>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div data-tour="tasks-filters" className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input value={search} onChange={(e) => setSearch(e.target.value)}

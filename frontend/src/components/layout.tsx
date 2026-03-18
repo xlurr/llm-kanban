@@ -2,6 +2,7 @@ import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/stores/auth-store'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { ProductTour, StartTourButton } from '@/components/product-tour'
 import { LayoutDashboard, KanbanSquare, ListChecks, LogOut, Bot, Layers } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -35,7 +36,7 @@ export function Layout() {
               </div>
               <span className="hidden sm:inline tracking-tight">LLM Kanban</span>
             </Link>
-            <nav className="hidden md:flex items-center gap-0.5">
+            <nav data-tour="main-nav" className="hidden md:flex items-center gap-0.5">
               {navItems.map(({ to, icon: Icon, label }) => {
                 const isActive = location.pathname === to || location.pathname.startsWith(to + '/')
                 return (
@@ -57,6 +58,7 @@ export function Layout() {
             </nav>
           </div>
           <div className="flex items-center gap-2">
+            <StartTourButton />
             <ThemeToggle />
             <button
               className="hidden sm:flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-muted transition-colors"
@@ -99,6 +101,9 @@ export function Layout() {
       <main key={location.pathname} className="container mx-auto px-4 py-6 animate-fade-in-up">
         <Outlet />
       </main>
+
+      {/* Product tour overlay */}
+      <ProductTour />
     </div>
   )
 }

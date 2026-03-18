@@ -85,7 +85,7 @@ export function BoardPage() {
   const activeEpic = activeTask ? epicMap.get(activeTask.id) : undefined
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-tour="board-page">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Канбан-доска</h1>
         <div className="flex gap-2">
@@ -100,7 +100,7 @@ export function BoardPage() {
 
       <DndContext sensors={sensors} collisionDetection={closestCorners}
         onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        <div className={`grid grid-cols-1 md:grid-cols-2 ${gridCols} gap-4`}>
+        <div data-tour="board-columns" className={`grid grid-cols-1 md:grid-cols-2 ${gridCols} gap-4`}>
           {columns.map((col) => (
             <KanbanColumn key={col.id} column={col}
               tasks={tasks.filter((t) => t.status === col.id)} epicMap={epicMap}

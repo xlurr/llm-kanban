@@ -79,7 +79,7 @@ export function BoardSettingsPage() {
       </div>
 
       {/* Transition Graph — interactive */}
-      <Card>
+      <Card data-tour="transition-graph">
         <CardHeader className="pb-2">
           <CardTitle className="text-base">Граф переходов ({transitions.length} правил)</CardTitle>
           <p className="text-xs text-muted-foreground">
@@ -102,7 +102,7 @@ export function BoardSettingsPage() {
       </Card>
 
       {/* Columns */}
-      <Card>
+      <Card data-tour="columns-config">
         <CardHeader>
           <CardTitle>Столбцы ({columns.length})</CardTitle>
         </CardHeader>

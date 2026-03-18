@@ -282,14 +282,14 @@ export function DashboardPage() {
   }, [tasks])
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-tour="dashboard-page">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Дашборд</h1>
         <p className="text-sm text-muted-foreground">{new Date().toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
       </div>
 
       {/* ── Row 1: Summary stats ── */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div data-tour="dashboard-stats" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardContent className="pt-5 pb-4">
             <div className="flex items-center justify-between">
@@ -358,7 +358,7 @@ export function DashboardPage() {
       </div>
 
       {/* ── Row 2: Column distribution + Priority donut ── */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div data-tour="dashboard-charts" className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Распределение по столбцам</CardTitle>
@@ -407,7 +407,7 @@ export function DashboardPage() {
       </div>
 
       {/* ── Row 3: Active tasks + Upcoming deadlines ── */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div data-tour="dashboard-active" className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
@@ -485,7 +485,7 @@ export function DashboardPage() {
       </div>
 
       {/* ── Row 4: Agent performance + Epic progress ── */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div data-tour="dashboard-performance" className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
@@ -570,7 +570,7 @@ export function DashboardPage() {
       </div>
 
       {/* ── Row 5: Most active users + Score distribution ── */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div data-tour="dashboard-users" className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
@@ -639,7 +639,7 @@ export function DashboardPage() {
       </div>
 
       {/* ── Row 6: Tags cloud + Quick stats ── */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div data-tour="dashboard-extras" className="grid gap-6 lg:grid-cols-3">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">

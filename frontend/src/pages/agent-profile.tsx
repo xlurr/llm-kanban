@@ -59,7 +59,7 @@ export function AgentProfilePage() {
   const statusInfo = statusLabels[agent.status]
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6" data-tour="agent-profile-page">
       <Button variant="ghost" className="gap-2" onClick={() => navigate(-1)}>
         <ArrowLeft className="h-4 w-4" /> Назад
       </Button>

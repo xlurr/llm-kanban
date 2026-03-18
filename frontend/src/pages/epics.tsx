@@ -40,7 +40,7 @@ export function EpicsPage() {
   const getEpicTasks = (epicId: string) => tasks.filter((t) => t.epicId === epicId)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-tour="epics-page">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Эпики</h1>
@@ -52,7 +52,7 @@ export function EpicsPage() {
         </Button>
       </div>
 
-      <div className="space-y-4 stagger-children">
+      <div data-tour="epics-list" className="space-y-4 stagger-children">
         {epics.map((epic) => {
           const epicTasks = getEpicTasks(epic.id)
           const doneTasks = epicTasks.filter((t) => t.status === 'done' || t.progress === 100).length
