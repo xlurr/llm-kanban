@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { ProductTour, StartTourButton } from '@/components/product-tour'
-import { LayoutDashboard, KanbanSquare, ListChecks, LogOut, Bot, Layers, Database, Network } from 'lucide-react'
+import { LayoutDashboard, KanbanSquare, ListChecks, LogOut, Bot, Layers, Database, Network, Users, Cpu } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
@@ -13,6 +13,8 @@ const navItems = [
   { to: '/epics', icon: Layers, label: 'Эпики' },
   { to: '/diagrams', icon: Database, label: 'Схема БД' },
   { to: '/architecture', icon: Network, label: 'Архитектура' },
+  { to: '/use-cases', icon: Users, label: 'Прецеденты' },
+  { to: '/tech-stack', icon: Cpu, label: 'Технологии' },
 ]
 
 export function Layout() {

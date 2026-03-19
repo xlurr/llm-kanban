@@ -18,7 +18,7 @@ import '@xyflow/react/dist/style.css'
 import { cn } from '@/lib/utils'
 import {
   Database, Key, Link2, Fingerprint, ChevronDown, ChevronRight,
-  Search, Filter, BarChart3, Table2, ArrowRightLeft, Eye, EyeOff,
+  Search, Filter, BarChart3, Table2, ArrowRightLeft, Eye, EyeOff, ZoomIn,
 } from 'lucide-react'
 
 // ── Schema Data ──────────────────────────────────────
@@ -577,14 +577,17 @@ interface TableNodeData {
   table: TableDef
   highlighted: boolean
   dimmed: boolean
+  depth: number
   [key: string]: unknown
 }
 
 function TableNode({ data }: { data: TableNodeData }) {
-  const { table, highlighted, dimmed } = data
+  const { table, highlighted, dimmed, depth: nodeDepth } = data
   const [collapsed, setCollapsed] = useState(false)
 
-  const visibleFields = collapsed ? table.fields.filter(f => f.pk || f.fk) : table.fields
+  const forceCollapsed = nodeDepth <= 2
+  const isCollapsed = forceCollapsed || collapsed
+  const visibleFields = isCollapsed ? table.fields.filter(f => f.pk || f.fk) : table.fields
 
   return (
     <div
@@ -626,14 +629,16 @@ function TableNode({ data }: { data: TableNodeData }) {
         >
           {table.fields.length}
         </span>
-        <button
-          onClick={(e) => { e.stopPropagation(); setCollapsed(!collapsed) }}
-          className="p-0.5 rounded hover:bg-black/10 dark:hover:bg-white/10 transition-colors flex-shrink-0"
-        >
-          {collapsed
-            ? <ChevronRight className="h-3 w-3 text-muted-foreground" />
-            : <ChevronDown className="h-3 w-3 text-muted-foreground" />}
-        </button>
+        {!forceCollapsed && (
+          <button
+            onClick={(e) => { e.stopPropagation(); setCollapsed(!collapsed) }}
+            className="p-0.5 rounded hover:bg-black/10 dark:hover:bg-white/10 transition-colors flex-shrink-0"
+          >
+            {collapsed
+              ? <ChevronRight className="h-3 w-3 text-muted-foreground" />
+              : <ChevronDown className="h-3 w-3 text-muted-foreground" />}
+          </button>
+        )}
       </div>
 
       {/* Fields */}
@@ -676,7 +681,7 @@ function TableNode({ data }: { data: TableNodeData }) {
           </div>
         ))}
 
-        {collapsed && table.fields.length > visibleFields.length && (
+        {isCollapsed && table.fields.length > visibleFields.length && (
           <div className="flex items-center justify-center h-5 text-[9px] text-muted-foreground border-t border-border/40">
             +{table.fields.length - visibleFields.length} скрыто
           </div>
@@ -686,9 +691,80 @@ function TableNode({ data }: { data: TableNodeData }) {
   )
 }
 
+// ── DB Group Node (depth 1) ──────────────────────────
+
+interface DbGroupNodeData {
+  group: TableGroup
+  bg: string
+  label: string
+  count: number
+  totalFields: number
+  tableNames: string[]
+  [key: string]: unknown
+}
+
+function DbGroupNode({ data }: { data: DbGroupNodeData }) {
+  return (
+    <div
+      className="rounded-2xl border-2 overflow-hidden shadow-xl min-w-[260px] cursor-grab active:cursor-grabbing bg-card"
+      style={{ borderColor: data.bg }}
+    >
+      <Handle type="target" position={Position.Top} className="!bg-transparent !w-full !h-3 !min-h-0 !border-0 !rounded-none !top-0" />
+      <Handle type="source" position={Position.Bottom} className="!bg-transparent !w-full !h-3 !min-h-0 !border-0 !rounded-none !bottom-0" />
+      <Handle type="target" position={Position.Left} className="!bg-transparent !h-full !w-3 !min-w-0 !border-0 !rounded-none !left-0" />
+      <Handle type="source" position={Position.Right} className="!bg-transparent !h-full !w-3 !min-w-0 !border-0 !rounded-none !right-0" />
+      <div className="px-5 py-4" style={{ background: `${data.bg}15` }}>
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl flex items-center justify-center" style={{ background: `${data.bg}25` }}>
+            <Database className="h-5 w-5" style={{ color: data.bg }} />
+          </div>
+          <div>
+            <div className="font-bold text-sm">{data.label}</div>
+            <div className="text-[10px] text-muted-foreground">{data.count} таблиц · {data.totalFields} полей</div>
+          </div>
+        </div>
+      </div>
+      <div className="px-5 py-3">
+        <div className="flex flex-wrap gap-1">
+          {data.tableNames.map(n => (
+            <span key={n} className="text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ background: `${data.bg}12`, color: data.bg }}>{n}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const nodeTypes: NodeTypes = {
   dbTable: TableNode as any,
+  dbGroup: DbGroupNode as any,
 }
+
+const DB_GROUP_POS: Record<string, { x: number; y: number }> = {
+  'g-core':        { x: 300, y: 0 },
+  'g-actors':      { x: 0,   y: 250 },
+  'g-config':      { x: 600, y: 250 },
+  'g-related':     { x: 600, y: 500 },
+  'g-analytics':   { x: 0,   y: 500 },
+  'g-security':    { x: 0,   y: 750 },
+  'g-integration': { x: 600, y: 750 },
+  'g-cache':       { x: 300, y: 1000 },
+}
+
+// Group-level relations for depth 1
+const DB_GROUP_RELATIONS: RelationDef[] = [
+  { from: 'g-core', fromField: '', to: 'g-actors', type: 'one-to-many', label: 'FK users/agents' },
+  { from: 'g-core', fromField: '', to: 'g-config', type: 'one-to-many', label: 'FK columns' },
+  { from: 'g-related', fromField: '', to: 'g-core', type: 'one-to-many', label: 'FK tasks' },
+  { from: 'g-related', fromField: '', to: 'g-actors', type: 'one-to-many', label: 'FK users' },
+  { from: 'g-analytics', fromField: '', to: 'g-core', type: 'one-to-many', label: 'FK tasks' },
+  { from: 'g-analytics', fromField: '', to: 'g-actors', type: 'one-to-many', label: 'FK agents' },
+  { from: 'g-security', fromField: '', to: 'g-actors', type: 'one-to-many', label: 'FK users' },
+  { from: 'g-integration', fromField: '', to: 'g-actors', type: 'one-to-many', label: 'FK users' },
+  { from: 'g-integration', fromField: '', to: 'g-core', type: 'one-to-many', label: 'FK tasks' },
+  { from: 'g-config', fromField: '', to: 'g-actors', type: 'one-to-many', label: 'FK users' },
+  { from: 'g-actors', fromField: '', to: 'g-security', type: 'one-to-many', label: 'API keys' },
+]
 
 // ── Positions ────────────────────────────────────────
 
@@ -755,6 +831,7 @@ function DbDiagramInner() {
   const [search, setSearch] = useState('')
   const [activeGroups, setActiveGroups] = useState<Set<TableGroup>>(new Set(Object.keys(GROUP_META) as TableGroup[]))
   const [showRelations, setShowRelations] = useState(true)
+  const [depth, setDepth] = useState<1 | 2 | 3>(3)
 
   const filteredTableIds = useMemo(() => {
     return new Set(
@@ -777,6 +854,27 @@ function DbDiagramInner() {
   }, [hoveredTable])
 
   const initialNodes: Node[] = useMemo(() => {
+    if (depth === 1) {
+      return (Object.entries(GROUP_META) as [TableGroup, { bg: string; label: string }][])
+        .filter(([key]) => activeGroups.has(key))
+        .map(([key, { bg, label }]) => {
+          const groupTables = TABLES.filter(t => t.group === key)
+          return {
+            id: `g-${key}`,
+            type: 'dbGroup',
+            position: DB_GROUP_POS[`g-${key}`] || { x: 0, y: 0 },
+            data: {
+              group: key,
+              bg,
+              label,
+              count: groupTables.length,
+              totalFields: groupTables.reduce((s, t) => s + t.fields.length, 0),
+              tableNames: groupTables.map(t => t.name),
+            } satisfies DbGroupNodeData,
+          }
+        })
+    }
+
     const positions = getInitialPositions()
     return TABLES
       .filter(t => filteredTableIds.has(t.id))
@@ -788,12 +886,27 @@ function DbDiagramInner() {
           table,
           highlighted: hoveredTable === table.id,
           dimmed: hoveredTable !== null && !connectedTables.has(table.id),
+          depth,
         } satisfies TableNodeData,
       }))
-  }, [hoveredTable, connectedTables, filteredTableIds])
+  }, [hoveredTable, connectedTables, filteredTableIds, depth, activeGroups])
 
   const initialEdges: Edge[] = useMemo(() => {
     if (!showRelations) return []
+    if (depth === 1) {
+      return DB_GROUP_RELATIONS.map((rel, i) => ({
+        id: `grel-${i}`,
+        source: rel.from,
+        target: rel.to,
+        type: 'smoothstep',
+        label: rel.label,
+        labelStyle: { fontSize: 9, fontFamily: 'ui-monospace, monospace', fill: '#52525b' },
+        labelBgStyle: { fill: 'hsl(var(--background))', fillOpacity: 0.8, rx: 4, ry: 4 },
+        labelBgPadding: [3, 5] as [number, number],
+        style: { stroke: '#3f3f46', strokeWidth: 1.5 },
+        markerEnd: { type: MarkerType.ArrowClosed, width: 12, height: 12, color: '#3f3f46' },
+      }))
+    }
     return RELATIONS
       .filter(r => filteredTableIds.has(r.from) && filteredTableIds.has(r.to))
       .map((rel, i) => {
@@ -837,7 +950,7 @@ function DbDiagramInner() {
           },
         }
       })
-  }, [hoveredTable, filteredTableIds, showRelations])
+  }, [hoveredTable, filteredTableIds, showRelations, depth])
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
@@ -908,6 +1021,25 @@ function DbDiagramInner() {
 
       {/* Toolbar */}
       <div className="flex items-center gap-2 mb-3 flex-wrap">
+        {/* Depth */}
+        <div className="flex items-center gap-1 bg-card border rounded-lg p-0.5">
+          <ZoomIn className="h-3.5 w-3.5 text-muted-foreground ml-2 mr-1" />
+          {([1, 2, 3] as const).map(d => (
+            <button
+              key={d}
+              onClick={() => setDepth(d)}
+              className={cn(
+                'px-3 py-1 rounded-md text-[11px] font-medium transition-all',
+                depth === d ? 'bg-foreground text-background shadow-sm' : 'text-muted-foreground hover:text-foreground',
+              )}
+            >
+              {d === 1 ? 'Обзор' : d === 2 ? 'Таблицы' : 'Детали'}
+            </button>
+          ))}
+        </div>
+
+        <div className="w-px h-6 bg-border" />
+
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />

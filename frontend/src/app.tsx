@@ -16,6 +16,8 @@ import { UserProfilePage } from '@/pages/user-profile'
 import { AgentProfilePage } from '@/pages/agent-profile'
 import { DbDiagramPage } from '@/pages/db-diagram'
 import { ArchitecturePage } from '@/pages/architecture'
+import { UseCasesPage } from '@/pages/use-cases'
+import { TechStackPage } from '@/pages/tech-stack'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore()
@@ -50,6 +52,8 @@ export function App() {
           <Route path="/agents/:id" element={<AgentProfilePage />} />
           <Route path="/diagrams" element={<DbDiagramPage />} />
           <Route path="/architecture" element={<ArchitecturePage />} />
+          <Route path="/use-cases" element={<UseCasesPage />} />
+          <Route path="/tech-stack" element={<TechStackPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
