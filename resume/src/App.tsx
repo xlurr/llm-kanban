@@ -1,711 +1,740 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { cn } from '@/lib/utils'
 import {
-  Mail, Phone, MapPin, Github, ExternalLink, ChevronRight,
-  Code2, Database, Container, Globe, Brain,
-  Briefcase, GraduationCap, Trophy, Layers, Server,
-  ArrowUpRight, Sparkles, Shield, ArrowUp,
+  Mail, Phone, MapPin, Github, ExternalLink,
+  Code2, Brain, Briefcase, GraduationCap, Trophy, Layers,
+  Shield, CheckCircle2, Target, Search, BookOpen, Eye, MessageSquare,
+  Clock, Users, GitBranch, Terminal, Rocket, ChevronRight
 } from 'lucide-react'
 
-// ── Hooks ──
+// ═══════════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════════
 
-function useInView(threshold = 0.1) {
-  const ref = useRef<HTMLDivElement>(null)
-  const [inView, setInView] = useState(false)
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setInView(true) },
-      { threshold },
-    )
-    obs.observe(el)
-    return () => obs.disconnect()
-  }, [threshold])
-  return { ref, inView }
+const PERSONAL = {
+  name: 'Никита Мосягин',
+  title: 'Full-Stack Developer',
+  subtitle: 'Go · React · TypeScript',
+  tagline: 'Превращаю идеи в production-ready код',
+  status: 'open',
+  yearsExp: 2,
+  email: 'aborigen.nm@gmail.com',
+  phone: '+7 911 645-98-85',
+  github: 'xlurr',
+  location: 'Великий Новгород',
 }
 
-function useMouseGlow() {
-  const ref = useRef<HTMLDivElement>(null)
-  const onMouseMove = useCallback((e: React.MouseEvent) => {
-    const el = ref.current
-    if (!el) return
-    const rect = el.getBoundingClientRect()
-    el.style.setProperty('--mx', `${e.clientX - rect.left}px`)
-    el.style.setProperty('--my', `${e.clientY - rect.top}px`)
-  }, [])
-  return { ref, onMouseMove }
-}
-
-// ── Small components ──
-
-function SectionTitle({ icon: Icon, title }: { icon: typeof Code2; title: string }) {
-  const { ref, inView } = useInView()
-  return (
-    <div ref={ref} className="flex items-center gap-3 mb-10">
-      <div className="h-11 w-11 rounded-xl bg-yellow-500/[0.08] border border-yellow-500/[0.15] flex items-center justify-center shrink-0">
-        <Icon className="h-5 w-5 text-yellow-500" />
-      </div>
-      <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
-      <div className="flex-1 h-px overflow-hidden">
-        <div
-          className="h-full bg-gradient-to-r from-yellow-500/30 via-zinc-700/50 to-transparent transition-all duration-1000 ease-out"
-          style={{ transform: inView ? 'translateX(0)' : 'translateX(-100%)' }}
-        />
-      </div>
-    </div>
-  )
-}
-
-function SkillBar({ level, inView }: { level: number; inView: boolean }) {
-  return (
-    <div className="w-full h-1.5 rounded-full bg-zinc-800/50 overflow-hidden">
-      <div
-        className="h-full rounded-full bg-gradient-to-r from-yellow-500/70 to-yellow-400/40 transition-all duration-[1.5s] ease-out"
-        style={{ width: inView ? `${level}%` : '0%' }}
-      />
-    </div>
-  )
-}
-
-function Particles() {
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {Array.from({ length: 8 }).map((_, i) => (
-        <div
-          key={i}
-          className="absolute w-1 h-1 rounded-full bg-yellow-500/20 animate-float"
-          style={{
-            left: `${10 + i * 11}%`,
-            top: `${15 + (i % 4) * 20}%`,
-            animationDelay: `${i * 0.7}s`,
-            animationDuration: `${5 + i * 0.4}s`,
-          }}
-        />
-      ))}
-    </div>
-  )
-}
-
-// Full-width section wrapper: bg spans 100vw, content is centered
-function FullSection({ id, children, className = '', bg = '' }: {
-  id: string
-  children: React.ReactNode
-  className?: string
-  bg?: string
-}) {
-  const { ref, inView } = useInView()
-  return (
-    <section
-      id={id}
-      ref={ref}
-      className={`w-full ${bg} transition-all duration-700 ease-out ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'} ${className}`}
-    >
-      {children}
-    </section>
-  )
-}
-
-// ── Data ──
-
-const NAV = [
-  { id: 'about', label: 'Обо мне' },
-  { id: 'experience', label: 'Опыт' },
-  { id: 'projects', label: 'Проекты' },
-  { id: 'skills', label: 'Навыки' },
-  { id: 'education', label: 'Образование' },
-  { id: 'contact', label: 'Контакты' },
+const METRICS = [
+  { label: 'Проектов в production', value: '3+', icon: Rocket, color: 'from-green-500 to-emerald-500' },
+  { label: 'Коммитов за год', value: '847', icon: GitBranch, color: 'from-blue-500 to-cyan-500' },
+  { label: 'Code reviews', value: '120+', icon: Eye, color: 'from-purple-500 to-pink-500' },
+  { label: 'Часов кодинга', value: '2000+', icon: Clock, color: 'from-orange-500 to-amber-500' },
 ]
+
+const STACK = {
+  backend: ['Go', 'chi', 'JWT', 'PostgreSQL', 'Firebird', 'Redis', 'gRPC'],
+  frontend: ['React', 'TypeScript', 'Vite', 'Tailwind', 'Zustand', 'TanStack Query'],
+  devops: ['Docker', 'Nginx', 'GitHub Actions', 'Linux', 'systemd'],
+  tools: ['Git', 'VSCode', 'Cursor', 'Postman', 'pgAdmin'],
+}
 
 const EXPERIENCE = [
   {
-    title: 'Разработчик — Биллинговая система ISP «Максима»',
-    period: 'Февраль 2026 — настоящее время',
-    type: 'Freelance / Production',
+    company: 'ISP «Максима»',
+    role: 'Full-Stack Developer',
+    type: 'Freelance',
+    period: 'Февраль 2026 — н.в.',
     location: 'Великий Новгород',
-    description: 'Разработка биллинговой системы личного кабинета для интернет-провайдера с нуля по техническому заданию.',
-    stack: ['Go 1.26', 'chi v5', 'JWT', 'Firebird SQL', 'Docker', 'Nginx', 'React', 'TypeScript', 'Vite', 'Framer Motion', 'MSW'],
-    highlights: [
-      'Спроектировал слоистую архитектуру: domain → repository → service → handler, каждый слой изолирован через интерфейсы',
-      'Реализовал JWT-аутентификацию: access/refresh токены (HS256), middleware, хранение секретов через env',
-      'Написал репозиторий для Firebird через database/sql с транзакциями, rollback и пулом соединений',
-      'Настроил структурированное логирование через zap с уровнями по окружению (dev/prod)',
-      'Docker Compose (backend + frontend + Firebird + migrate), Nginx reverse proxy с gzip',
-      'Фронтенд с мок-слоем через MSW — разработка UI без готового бэкенда',
-      'Graceful shutdown через os.Signal, конфигурация через cleanenv + YAML + .env',
+    description: 'Разработка биллинговой системы личного кабинета для интернет-провайдера с нуля.',
+    achievements: [
+      'Спроектировал и реализовал REST API на Go с JWT авторизацией',
+      'Построил React SPA с Framer Motion анимациями',
+      'Настроил Docker Compose окружение для production',
+      'Внедрил MSW для независимой разработки фронтенда',
     ],
+    stack: ['Go', 'chi', 'JWT', 'Firebird', 'React', 'TypeScript', 'Docker', 'Nginx'],
+    highlight: true,
   },
   {
-    title: 'Разработчик — Feature Flags Manager',
-    period: '2025 — настоящее время',
-    type: 'Пет-проект / Курсовая',
-    location: '',
-    description: 'Full-stack сервис управления feature flags — аналог LaunchDarkly/Unleash.',
-    stack: ['Go 1.22', 'chi v5', 'PostgreSQL 16', 'React', 'TypeScript', 'TanStack Query', 'Drizzle ORM', 'Shadcn/ui', 'Docker'],
-    highlights: [
-      'Go backend с чистой архитектурой: domain entities → ports (interfaces) → adapters (http handler)',
-      'Схема PostgreSQL 16: UUID primary keys, JSONB targeting_rules, индексы на горячие поля',
-      'Eval-endpoint: по client_api_key возвращает карту {flag_key: bool} для клиентских SDK',
-      'React SPA: dashboard, управление флагами по окружениям, audit log, полный CRUD через TanStack Query',
-      'Multi-stage Dockerfile для Go (CGO_ENABLED=0, alpine)',
+    company: 'Feature Flags Manager',
+    role: 'Full-Stack Developer',
+    type: 'Pet-проект',
+    period: '2025 — н.в.',
+    description: 'Аналог LaunchDarkly для управления feature flags.',
+    achievements: [
+      'Clean Architecture с DI через интерфейсы',
+      'JSONB для гибких targeting rules',
+      'Real-time eval endpoint для SDK',
+      'Audit log с полной историей изменений',
     ],
+    stack: ['Go', 'PostgreSQL', 'React', 'TanStack Query', 'Drizzle', 'Docker'],
+    highlight: false,
   },
 ]
 
 const PROJECTS = [
   {
-    name: 'Billing Service (ISP «Максима»)',
-    description: 'Production биллинговая система для интернет-провайдера. Go-бэкенд, JWT, Firebird DB, React фронтенд.',
-    stack: ['Go', 'JWT', 'Firebird', 'Docker', 'Nginx', 'React', 'TypeScript'],
+    name: 'LLM Kanban',
+    desc: 'Канбан для AI-агентов с визуализацией архитектуры',
+    stack: ['React 19', 'TypeScript', 'Zustand', 'React Flow'],
+    url: 'https://llm-kanban.vercel.app',
+    dashboardUrl: 'https://llm-kanban.vercel.app/dashboard',
+    gradient: 'from-violet-500 to-purple-500',
+  },
+  {
+    name: 'Billing Service',
+    desc: 'Production биллинг для ISP с JWT auth',
+    stack: ['Go', 'Firebird', 'React', 'Docker'],
     url: 'https://github.com/stepan41k/billing-service',
-    featured: true,
+    gradient: 'from-emerald-500 to-teal-500',
   },
   {
-    name: 'Feature Flags Manager',
-    description: 'Аналог LaunchDarkly. Управление feature flags с eval API, targeting rules и audit log.',
-    stack: ['Go', 'PostgreSQL', 'React', 'TanStack Query', 'Drizzle', 'Docker'],
+    name: 'Feature Flags',
+    desc: 'Self-hosted LaunchDarkly альтернатива',
+    stack: ['Go', 'PostgreSQL', 'React', 'Drizzle'],
     url: 'https://github.com/xlurr/feature-flags',
-    featured: true,
-  },
-  {
-    name: 'LLM Kanban — Оркестрация AI-агентов',
-    description: 'Канбан-система для управления задачами, выполняемыми LLM-агентами. CI/CD визуализация, drag-and-drop доска, аналитика, ревью.',
-    stack: ['React 19', 'TypeScript', 'Vite', 'Tailwind', 'Zustand', 'Recharts', 'React Flow', '@dnd-kit'],
-    url: 'https://github.com/xlurr',
-    featured: true,
-  },
-  {
-    name: 'Telegram-боты',
-    description: 'Уведомления, CRUD-операции, интеграции с API. Webhook и polling, управление состояниями.',
-    stack: ['Go', 'Telegram Bot API'],
-    url: 'https://github.com/xlurr',
-    featured: false,
+    gradient: 'from-orange-500 to-red-500',
   },
 ]
 
-const SKILL_GROUPS = [
-  {
-    title: 'Backend',
-    icon: Server,
-    skills: [
-      { name: 'Go', detail: 'chi, golang-jwt, bcrypt, zap, cleanenv, golang-migrate, database/sql, goroutines, context', level: 90 },
-      { name: 'Архитектура', detail: 'Layered architecture, DI через интерфейсы, REST API, graceful shutdown', level: 85 },
-      { name: 'C++', detail: 'STL, RAII, шаблоны, работа с памятью — алгоритмы и низкоуровневые концепции', level: 65 },
-      { name: 'Python', detail: 'Скрипты, автоматизация, прототипирование', level: 55 },
-    ],
-  },
-  {
-    title: 'Frontend',
-    icon: Globe,
-    skills: [
-      { name: 'TypeScript / React', detail: 'Vite, TanStack Query, Framer Motion, Shadcn/ui, Zustand, React Hook Form', level: 80 },
-      { name: 'Стилизация', detail: 'Tailwind CSS, CSS Modules, CSS Custom Properties', level: 75 },
-      { name: 'Инструменты', detail: 'MSW (мокирование API), Recharts, React Flow, @dnd-kit', level: 70 },
-    ],
-  },
-  {
-    title: 'Базы данных',
-    icon: Database,
-    skills: [
-      { name: 'PostgreSQL 16', detail: 'Схемы, индексы, JSONB, транзакции, UUID, миграции', level: 80 },
-      { name: 'Firebird SQL', detail: 'database/sql, транзакции, пул соединений', level: 60 },
-      { name: 'SQLite', detail: 'Drizzle ORM + better-sqlite3', level: 55 },
-    ],
-  },
-  {
-    title: 'DevOps',
-    icon: Container,
-    skills: [
-      { name: 'Docker', detail: 'Docker Compose, multi-stage builds, healthcheck, зависимости', level: 80 },
-      { name: 'Nginx', detail: 'Reverse proxy, upstream, gzip, таймауты', level: 65 },
-      { name: 'Git', detail: 'GitHub, GitLab, PR, code review, GitLab CI/CD', level: 85 },
-      { name: 'Unix', detail: 'macOS/Linux, терминал, shell-скрипты, процессы, env', level: 70 },
-    ],
-  },
-  {
-    title: 'AI / LLM',
-    icon: Brain,
-    skills: [
-      { name: 'Claude', detail: 'Архитектурные решения, code review, генерация шаблонного кода', level: 85 },
-      { name: 'GitHub Copilot', detail: 'Автодополнение в VSCode', level: 75 },
-      { name: 'Cursor', detail: 'AI-assisted редактирование, объяснение незнакомого кода', level: 70 },
-      { name: 'Perplexity', detail: 'Быстрый поиск по документации и RFC', level: 65 },
-    ],
-  },
+const SKILLS = [
+  { name: 'Go', level: 90, category: 'backend' },
+  { name: 'PostgreSQL', level: 85, category: 'backend' },
+  { name: 'REST API', level: 90, category: 'backend' },
+  { name: 'React', level: 85, category: 'frontend' },
+  { name: 'TypeScript', level: 85, category: 'frontend' },
+  { name: 'Tailwind', level: 90, category: 'frontend' },
+  { name: 'Docker', level: 80, category: 'devops' },
+  { name: 'Git', level: 90, category: 'devops' },
 ]
 
-const TECH_MARQUEE = [
-  'Go', 'React', 'TypeScript', 'PostgreSQL', 'Docker', 'Nginx', 'JWT', 'REST API',
-  'Tailwind', 'Vite', 'Zustand', 'Git', 'Linux', 'CI/CD', 'Firebird', 'Redis',
+const SOFT_SKILLS = [
+  { name: 'Самостоятельность', icon: Target, desc: 'Разбираюсь в новых технологиях без подсказок' },
+  { name: 'Решение проблем', icon: Search, desc: 'Декомпозиция задач, дебаг, логи' },
+  { name: 'Обучаемость', icon: BookOpen, desc: 'Быстро осваиваю новые стеки' },
+  { name: 'Коммуникация', icon: MessageSquare, desc: 'Документирую решения, объясняю код' },
 ]
 
-// ── Main App ──
+const EDUCATION = {
+  university: 'НовГУ им. Ярослава Мудрого',
+  degree: 'Информатика и вычислительная техника',
+  year: '2027',
+  military: true,
+  courses: ['Дискретная математика', 'Теория алгоритмов', 'C/C++', 'PostgreSQL', 'Микросервисы', 'Сети'],
+}
 
-export function App() {
-  const [activeSection, setActiveSection] = useState('about')
-  const [scrolled, setScrolled] = useState(false)
-  const [scrollProgress, setScrollProgress] = useState(0)
+// ═══════════════════════════════════════════════════════════════
+// COMPONENTS
+// ═══════════════════════════════════════════════════════════════
+
+function GlowCard({ children, className, glow = 'yellow' }: { children: React.ReactNode; className?: string; glow?: string }) {
+  const glowColors: Record<string, string> = {
+    yellow: 'hover:shadow-yellow-500/20',
+    blue: 'hover:shadow-blue-500/20',
+    green: 'hover:shadow-green-500/20',
+    purple: 'hover:shadow-purple-500/20',
+  }
+  return (
+    <div className={cn(
+      'group relative rounded-2xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-sm',
+      'transition-all duration-500 hover:border-white/[0.15] hover:bg-white/[0.04]',
+      `hover:shadow-2xl ${glowColors[glow]}`,
+      className
+    )}>
+      {children}
+    </div>
+  )
+}
+
+function AnimatedCounter({ value, suffix = '' }: { value: number; suffix?: string }) {
+  const [count, setCount] = useState(0)
+  const ref = useRef<HTMLSpanElement>(null)
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20)
-      const docH = document.documentElement.scrollHeight - window.innerHeight
-      setScrollProgress(docH > 0 ? (window.scrollY / docH) * 100 : 0)
-      const sections = NAV.map((n) => document.getElementById(n.id))
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const el = sections[i]
-        if (el && el.getBoundingClientRect().top <= 120) {
-          setActiveSection(NAV[i].id)
-          break
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          let start = 0
+          const duration = 2000
+          const step = (timestamp: number) => {
+            if (!start) start = timestamp
+            const progress = Math.min((timestamp - start) / duration, 1)
+            setCount(Math.floor(progress * value))
+            if (progress < 1) requestAnimationFrame(step)
+          }
+          requestAnimationFrame(step)
         }
-      }
-    }
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+      },
+      { threshold: 0.5 }
+    )
+    if (ref.current) observer.observe(ref.current)
+    return () => observer.disconnect()
+  }, [value])
 
-  const heroGlow = useMouseGlow()
+  return <span ref={ref}>{count}{suffix}</span>
+}
+
+function SkillBar({ name, level }: { name: string; level: number }) {
+  const [width, setWidth] = useState(0)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setWidth(level) },
+      { threshold: 0.5 }
+    )
+    if (ref.current) observer.observe(ref.current)
+    return () => observer.disconnect()
+  }, [level])
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden">
-      {/* Scroll progress */}
-      <div className="fixed top-0 left-0 right-0 z-[60] h-[3px]">
+    <div ref={ref} className="space-y-2">
+      <div className="flex justify-between text-sm">
+        <span className="font-medium">{name}</span>
+        <span className="text-zinc-500">{level}%</span>
+      </div>
+      <div className="h-2 rounded-full bg-white/[0.05] overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-yellow-500 to-yellow-300 shadow-[0_0_12px_rgba(234,179,8,0.4)]"
-          style={{ width: `${scrollProgress}%`, transition: 'width 100ms linear' }}
+          className="h-full rounded-full bg-gradient-to-r from-yellow-500 to-amber-500 transition-all duration-1000 ease-out"
+          style={{ width: `${width}%` }}
         />
       </div>
+    </div>
+  )
+}
 
-      {/* ── Header ── */}
-      <header className={`fixed top-[3px] left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'bg-[#0a0a0b]/85 backdrop-blur-xl border-b border-yellow-500/[0.06]' : ''}`}>
-        <div className="w-full flex items-center justify-between px-8 lg:px-16 h-14">
-          <a href="#about" className="text-sm font-bold tracking-tight hover:text-yellow-400 transition-colors group">
-            nikita<span className="text-yellow-500 group-hover:text-yellow-300 transition-colors">.dev</span>
-          </a>
-          <nav className="hidden md:flex items-center gap-0.5">
-            {NAV.map((n) => (
-              <a
-                key={n.id}
-                href={`#${n.id}`}
-                className={`relative px-3.5 py-1.5 text-sm rounded-lg transition-all duration-300 ${
-                  activeSection === n.id ? 'text-yellow-400 font-medium' : 'text-zinc-500 hover:text-zinc-300'
-                }`}
-              >
-                {activeSection === n.id && (
-                  <span className="absolute inset-0 rounded-lg bg-yellow-500/[0.08] border border-yellow-500/[0.12]" />
-                )}
-                <span className="relative">{n.label}</span>
-              </a>
-            ))}
-          </nav>
-          <a
-            href="https://github.com/xlurr"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm text-zinc-500 hover:text-yellow-400 transition-colors"
-          >
-            <Github className="h-4 w-4" />
-            <span className="hidden sm:inline">GitHub</span>
-          </a>
-        </div>
-      </header>
+function TechBadge({ name, size = 'md' }: { name: string; size?: 'sm' | 'md' }) {
+  return (
+    <span className={cn(
+      'inline-flex items-center rounded-lg border border-white/[0.08] bg-white/[0.03]',
+      'transition-all duration-300 hover:border-yellow-500/30 hover:bg-yellow-500/[0.05]',
+      size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-3 py-1 text-sm'
+    )}>
+      {name}
+    </span>
+  )
+}
 
-      {/* ════════════════════════ HERO ════════════════════════ */}
-      <section
-        id="about"
-        ref={heroGlow.ref}
-        onMouseMove={heroGlow.onMouseMove}
-        className="relative w-full min-h-screen flex items-center border-b border-zinc-800/40"
-      >
-        {/* Background effects */}
-        <div className="absolute inset-0 pointer-events-none">
-          {/* Grid */}
-          <div className="absolute inset-0 opacity-[0.03]" style={{
-            backgroundImage: 'linear-gradient(rgba(234,179,8,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(234,179,8,0.5) 1px, transparent 1px)',
-            backgroundSize: '60px 60px',
-          }} />
-          {/* Radial gradient */}
-          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(234,179,8,0.08),transparent)]" />
-          {/* Mouse glow */}
-          <div
-            className="absolute w-[600px] h-[600px] rounded-full opacity-30"
-            style={{
-              background: 'radial-gradient(circle, rgba(234,179,8,0.12) 0%, transparent 70%)',
-              left: 'var(--mx, 50%)',
-              top: 'var(--my, 50%)',
-              transform: 'translate(-50%, -50%)',
-            }}
-          />
-        </div>
+// ═══════════════════════════════════════════════════════════════
+// MAIN APP
+// ═══════════════════════════════════════════════════════════════
 
-        <Particles />
+export function App() {
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
 
-        <div className="relative w-full px-8 lg:px-16 py-32 grid lg:grid-cols-2 gap-16 items-center">
-          {/* Left — text */}
-          <div className="space-y-8 animate-fade-in-up">
-            <div className="inline-flex items-center gap-2.5 rounded-full border border-yellow-500/20 bg-yellow-500/[0.05] px-4 py-1.5 text-sm text-yellow-400/80 backdrop-blur-sm">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-500" />
-              </span>
-              Открыт к предложениям
-            </div>
+  useEffect(() => {
+    const handleMouse = (e: MouseEvent) => {
+      setMousePos({ x: e.clientX, y: e.clientY })
+    }
+    window.addEventListener('mousemove', handleMouse)
+    return () => window.removeEventListener('mousemove', handleMouse)
+  }, [])
 
-            <div>
-              <p className="text-sm font-mono text-yellow-500/60 mb-3 tracking-wider uppercase">Full-Stack Developer</p>
-              <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black tracking-tight leading-[1.02]">
-                Никита
-                <br />
-                <span className="bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-500 bg-clip-text text-transparent gradient-text-animated bg-[length:200%_auto]">
-                  Мосягин
-                </span>
-              </h1>
-            </div>
-
-            <p className="text-lg lg:text-xl text-zinc-400 max-w-xl leading-relaxed">
-              Разрабатываю backend на <span className="text-yellow-400 font-medium">Go</span> и full-stack
-              веб-приложения. Проектирую REST API, пишу бизнес-логику сервисов,
-              строю фронтенд на <span className="text-yellow-400 font-medium">React + TypeScript</span>.
-            </p>
-
-            <div className="flex flex-wrap items-center gap-4">
-              <a href="#contact" className="inline-flex items-center gap-2 px-7 py-3.5 bg-yellow-500 text-black text-sm font-bold rounded-xl hover:bg-yellow-400 transition-all hover:shadow-lg hover:shadow-yellow-500/25 active:scale-95">
-                Связаться <ArrowUpRight className="h-4 w-4" />
-              </a>
-              <a href="#projects" className="inline-flex items-center gap-2 px-7 py-3.5 border border-zinc-700 text-sm font-medium rounded-xl hover:border-yellow-500/30 hover:bg-yellow-500/[0.04] transition-all active:scale-95">
-                Проекты <ChevronRight className="h-4 w-4" />
-              </a>
-            </div>
-          </div>
-
-          {/* Right — stats grid */}
-          <div className="grid grid-cols-2 gap-4 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
-            {[
-              { value: 'Go', label: 'Основной язык', accent: true },
-              { value: '3+', label: 'Проекта в production', accent: false },
-              { value: 'B1-B2', label: 'Английский', accent: false },
-              { value: '2027', label: 'Выпуск НовГУ', accent: false },
-            ].map((s, i) => (
-              <div
-                key={s.label}
-                className="relative rounded-2xl border border-zinc-800/60 bg-zinc-900/40 backdrop-blur-sm p-6 hover:border-yellow-500/[0.15] transition-all duration-500 group"
-              >
-                {i === 0 && <div className="absolute -top-px left-6 right-6 h-px bg-gradient-to-r from-transparent via-yellow-500/40 to-transparent" />}
-                <p className={`text-3xl lg:text-4xl font-bold ${s.accent ? 'font-mono text-yellow-400' : ''}`}>{s.value}</p>
-                <p className="text-sm text-zinc-500 mt-1">{s.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ════════════════════════ TECH MARQUEE ════════════════════════ */}
-      <div className="w-full border-b border-zinc-800/40 bg-zinc-900/30 py-4 overflow-hidden">
-        <div className="absolute left-0 top-0 bottom-0 w-40 bg-gradient-to-r from-[#0a0a0b] to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-40 bg-gradient-to-l from-[#0a0a0b] to-transparent z-10 pointer-events-none" />
-        <div className="marquee-track">
-          {[...TECH_MARQUEE, ...TECH_MARQUEE].map((tech, i) => (
-            <span key={i} className="px-8 py-2 text-sm text-zinc-600 font-mono whitespace-nowrap flex items-center gap-4">
-              {tech} <span className="text-yellow-500/30">&#x2022;</span>
-            </span>
-          ))}
-        </div>
+  return (
+    <div className="min-h-screen bg-[#09090b] text-white overflow-x-hidden">
+      {/* Ambient background */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div
+          className="absolute w-[800px] h-[800px] rounded-full opacity-20 blur-[150px] transition-all duration-1000"
+          style={{
+            background: 'radial-gradient(circle, rgba(234,179,8,0.15) 0%, transparent 70%)',
+            left: mousePos.x - 400,
+            top: mousePos.y - 400,
+          }}
+        />
+        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-yellow-500/[0.03] rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-blue-500/[0.03] rounded-full blur-[100px]" />
       </div>
 
-      {/* ════════════════════════ EXPERIENCE ════════════════════════ */}
-      <FullSection id="experience" className="py-24 lg:py-32">
-        <div className="w-full px-8 lg:px-16 max-w-[1400px] mx-auto">
-          <SectionTitle icon={Briefcase} title="Опыт работы" />
+      {/* Grid pattern */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.015]" style={{
+        backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                          linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+        backgroundSize: '50px 50px',
+      }} />
 
-          <div className="relative space-y-6">
-            {/* Timeline line */}
-            <div className="absolute left-5 top-0 bottom-0 w-px bg-gradient-to-b from-yellow-500/30 via-zinc-800 to-transparent hidden md:block" />
-
-            {EXPERIENCE.map((exp, i) => (
-              <div
-                key={i}
-                className="group relative md:pl-16 rounded-2xl border border-zinc-800/50 bg-zinc-900/30 p-6 lg:p-8 hover:border-yellow-500/[0.15] hover:bg-zinc-900/50 transition-all duration-500 tilt-card"
-              >
-                {/* Timeline dot */}
-                <div className="absolute left-[14px] top-10 h-4 w-4 rounded-full border-2 border-zinc-700 bg-zinc-900 group-hover:border-yellow-500/60 group-hover:bg-yellow-500/10 transition-all hidden md:flex items-center justify-center">
-                  <span className="absolute inset-0 rounded-full bg-yellow-500/20 opacity-0 group-hover:opacity-100 group-hover:animate-ping" />
+      <div className="relative">
+        {/* ═══════════════════════════════════════════════════════════════ */}
+        {/* HERO SECTION */}
+        {/* ═══════════════════════════════════════════════════════════════ */}
+        <section className="min-h-screen flex items-center px-6 lg:px-16">
+          <div className="w-full max-w-7xl mx-auto py-20">
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              {/* Left side - Main info */}
+              <div className="space-y-8">
+                {/* Status badge */}
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-green-500/30 bg-green-500/[0.08]">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                  </span>
+                  <span className="text-sm text-green-400">Открыт к предложениям</span>
                 </div>
 
-                <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-3 mb-5">
-                  <div>
-                    <h3 className="text-xl font-semibold group-hover:text-yellow-50 transition-colors">{exp.title}</h3>
-                    <p className="text-sm text-zinc-500 mt-1">{exp.type}{exp.location && ` · ${exp.location}`}</p>
-                  </div>
-                  <span className="text-sm text-zinc-600 shrink-0 font-mono bg-zinc-800/50 px-3 py-1 rounded-md">{exp.period}</span>
+                {/* Name */}
+                <div>
+                  <h1 className="text-5xl lg:text-7xl font-black tracking-tight mb-4">
+                    {PERSONAL.name.split(' ')[0]}
+                    <br />
+                    <span className="bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 bg-clip-text text-transparent">
+                      {PERSONAL.name.split(' ')[1]}
+                    </span>
+                  </h1>
+                  <p className="text-xl lg:text-2xl text-zinc-400 font-light">
+                    {PERSONAL.tagline}
+                  </p>
                 </div>
 
-                <p className="text-sm text-zinc-400 mb-5">{exp.description}</p>
-
-                <div className="flex flex-wrap gap-1.5 mb-5">
-                  {exp.stack.map((t) => (
-                    <span key={t} className="px-2.5 py-0.5 text-xs rounded-md bg-yellow-500/[0.04] border border-yellow-500/[0.08] text-zinc-400 hover:text-yellow-400 hover:border-yellow-500/20 transition-colors">
-                      {t}
+                {/* Role tags */}
+                <div className="flex flex-wrap gap-2">
+                  {['Backend Developer', 'Go Enthusiast', 'React Developer'].map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-4 py-2 rounded-xl border border-white/[0.08] bg-white/[0.02] text-sm font-medium"
+                    >
+                      {tag}
                     </span>
                   ))}
                 </div>
 
-                <ul className="space-y-2.5">
-                  {exp.highlights.map((h, j) => (
-                    <li key={j} className="flex gap-3 text-sm text-zinc-400">
-                      <ChevronRight className="h-4 w-4 text-yellow-500/40 shrink-0 mt-0.5" />
-                      <span>{h}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-
-            {/* Hackathon */}
-            <div className="relative md:pl-16 rounded-2xl border border-zinc-800/50 bg-zinc-900/30 p-6 lg:p-8 hover:border-amber-500/[0.15] transition-all duration-500 tilt-card">
-              <div className="absolute left-[14px] top-10 h-4 w-4 rounded-full border-2 border-amber-500/30 bg-amber-500/10 hidden md:block" />
-              <div className="flex items-start gap-4">
-                <div className="h-12 w-12 rounded-xl bg-amber-500/[0.08] border border-amber-500/[0.12] flex items-center justify-center shrink-0">
-                  <Trophy className="h-6 w-6 text-amber-500/70" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold">НорНикель Digital Hack 2024</h3>
-                  <p className="text-sm text-zinc-500 mt-2 leading-relaxed">
-                    Хакатон — разработка прототипа по кейсу компании в ограниченные сроки.
-                    Работа в условиях жёстких временных рамок, быстрая итерация и защита решения перед техническим жюри.
-                  </p>
+                {/* CTA buttons */}
+                <div className="flex flex-wrap gap-4">
+                  <a
+                    href={`mailto:${PERSONAL.email}`}
+                    className="group inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-yellow-500 to-amber-500 text-black font-bold transition-all hover:shadow-lg hover:shadow-yellow-500/25 hover:scale-105"
+                  >
+                    <Mail className="h-5 w-5" />
+                    Написать мне
+                    <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </a>
+                  <a
+                    href={`https://github.com/${PERSONAL.github}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-white/[0.1] bg-white/[0.02] font-medium transition-all hover:bg-white/[0.05] hover:border-white/[0.2]"
+                  >
+                    <Github className="h-5 w-5" />
+                    GitHub
+                  </a>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </FullSection>
 
-      {/* ════════════════════════ PROJECTS ════════════════════════ */}
-      <FullSection id="projects" className="py-24 lg:py-32" bg="bg-zinc-900/20">
-        <div className="w-full px-8 lg:px-16 max-w-[1400px] mx-auto">
-          <SectionTitle icon={Layers} title="Проекты" />
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-            {PROJECTS.map((proj, i) => (
-              <a
-                key={proj.name}
-                href={proj.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`group relative rounded-2xl border p-6 transition-all duration-500 tilt-card overflow-hidden flex flex-col ${
-                  proj.featured
-                    ? 'border-zinc-700/50 bg-zinc-900/50'
-                    : 'border-zinc-800/50 bg-zinc-900/30'
-                }`}
-                style={{ animationDelay: `${i * 100}ms` }}
-              >
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-yellow-500/[0.04] to-transparent pointer-events-none" />
-
-                {proj.featured && (
-                  <div className="absolute top-4 right-4">
-                    <Sparkles className="h-4 w-4 text-yellow-500/30 group-hover:text-yellow-400/60 transition-colors" />
-                  </div>
-                )}
-
-                <div className="relative flex flex-col flex-1">
-                  <div className="flex items-center gap-2 mb-3">
-                    <h3 className="font-semibold group-hover:text-yellow-50 transition-colors">{proj.name}</h3>
-                    <ExternalLink className="h-3.5 w-3.5 text-zinc-600 opacity-0 group-hover:opacity-100 transition-all" />
-                  </div>
-                  <p className="text-sm text-zinc-500 leading-relaxed flex-1">{proj.description}</p>
-                  <div className="flex flex-wrap gap-1.5 pt-4 mt-auto">
-                    {proj.stack.map((t) => (
-                      <span key={t} className="px-2 py-0.5 text-[11px] rounded-md bg-yellow-500/[0.04] border border-yellow-500/[0.06] text-zinc-500 group-hover:text-zinc-400 transition-colors">
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-500/0 to-transparent group-hover:via-yellow-500/30 transition-all duration-500" />
-              </a>
-            ))}
-          </div>
-        </div>
-      </FullSection>
-
-      {/* ════════════════════════ SKILLS ════════════════════════ */}
-      <FullSection id="skills" className="py-24 lg:py-32">
-        <div className="w-full px-8 lg:px-16 max-w-[1400px] mx-auto">
-          <SectionTitle icon={Code2} title="Навыки" />
-
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {SKILL_GROUPS.map((group) => {
-              const Icon = group.icon
-              const { ref, inView } = useInView()
-              return (
-                <div
-                  key={group.title}
-                  ref={ref}
-                  className="rounded-2xl border border-zinc-800/50 bg-zinc-900/30 overflow-hidden hover:border-yellow-500/[0.1] transition-all duration-500 tilt-card"
-                >
-                  <div className="flex items-center gap-3 px-6 py-4 border-b border-zinc-800/30">
-                    <div className="h-9 w-9 rounded-lg bg-yellow-500/[0.06] flex items-center justify-center">
-                      <Icon className="h-4 w-4 text-yellow-500/70" />
-                    </div>
-                    <h3 className="font-semibold text-sm tracking-wide">{group.title}</h3>
-                  </div>
-                  <div className="divide-y divide-zinc-800/20 p-3">
-                    {group.skills.map((skill) => (
-                      <div key={skill.name} className="px-4 py-3 rounded-lg hover:bg-yellow-500/[0.02] transition-colors">
-                        <div className="flex items-baseline justify-between mb-1.5">
-                          <span className="text-sm font-medium">{skill.name}</span>
-                          <span className="text-xs text-zinc-600 font-mono">{skill.level}%</span>
-                        </div>
-                        <SkillBar level={skill.level} inView={inView} />
-                        <p className="text-xs text-zinc-500 mt-2 leading-relaxed">{skill.detail}</p>
+              {/* Right side - Stats cards */}
+              <div className="grid grid-cols-2 gap-4">
+                {METRICS.map((metric, i) => {
+                  const Icon = metric.icon
+                  return (
+                    <GlowCard key={metric.label} className="p-6">
+                      <div className={cn(
+                        'h-12 w-12 rounded-xl bg-gradient-to-br mb-4 flex items-center justify-center',
+                        metric.color
+                      )}>
+                        <Icon className="h-6 w-6 text-white" />
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-
-          {/* LLM note */}
-          <div className="mt-8 rounded-xl border border-yellow-500/[0.1] bg-yellow-500/[0.02] p-6">
-            <p className="text-sm text-zinc-400 leading-relaxed">
-              <span className="font-semibold text-yellow-400">Подход к AI-инструментам:</span>{' '}
-              использую LLM как часть инженерного процесса, а не как замену мышлению.
-              Не делегирую LLM финальные решения по безопасности и архитектуре, всегда верифицирую вывод.
-            </p>
-          </div>
-
-          {/* General skills */}
-          <div className="flex flex-wrap gap-2 mt-6">
-            {[
-              'Быстрое погружение в незнакомый codebase',
-              'Чтение документации и исходного кода',
-              'Swagger / OpenAPI',
-              'Английский B1-B2',
-            ].map((s) => (
-              <span key={s} className="px-4 py-2 text-sm rounded-lg border border-zinc-800 text-zinc-400 bg-zinc-900/30 hover:border-yellow-500/20 hover:text-yellow-50 transition-all cursor-default">
-                {s}
-              </span>
-            ))}
-          </div>
-        </div>
-      </FullSection>
-
-      {/* ════════════════════════ EDUCATION ════════════════════════ */}
-      <FullSection id="education" className="py-24 lg:py-32" bg="bg-zinc-900/20">
-        <div className="w-full px-8 lg:px-16 max-w-[1400px] mx-auto">
-          <SectionTitle icon={GraduationCap} title="Образование" />
-
-          <div className="rounded-2xl border border-zinc-800/50 bg-zinc-900/30 p-8 lg:p-10 space-y-6 hover:border-yellow-500/[0.1] transition-all duration-500">
-            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-              <div>
-                <h3 className="text-xl lg:text-2xl font-bold">Новгородский государственный университет</h3>
-                <p className="text-sm text-zinc-500 mt-1">им. Ярослава Мудрого</p>
-              </div>
-              <span className="text-sm text-yellow-500/60 font-mono shrink-0 bg-yellow-500/[0.06] px-3 py-1.5 rounded-md border border-yellow-500/[0.1]">
-                Выпуск 2027
-              </span>
-            </div>
-
-            <p className="text-lg font-medium text-zinc-300">Информатика и вычислительная техника</p>
-
-            <p className="text-sm text-zinc-400 leading-relaxed max-w-3xl">
-              Программа от фундамента к прикладному: дискретная математика, теория алгоритмов,
-              низкоуровневое программирование (C/C++, архитектура ЭВМ), затем — базы данных (PostgreSQL),
-              операционные системы, микросервисная архитектура (курс от инженеров «Индид»), сети, системное программирование.
-            </p>
-
-            <div className="flex items-start gap-4 p-6 rounded-xl bg-yellow-500/[0.02] border border-yellow-500/[0.08]">
-              <Shield className="h-6 w-6 text-yellow-500/60 shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-semibold">Военная кафедра — пройдена полностью</p>
-                <p className="text-sm text-zinc-500 mt-1.5 leading-relaxed">
-                  Принятие решений в условиях неполной информации, ответственность за команду,
-                  следование процедурам под давлением — навыки для работы над критичными системами.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </FullSection>
-
-      {/* ════════════════════════ CONTACT ════════════════════════ */}
-      <FullSection id="contact" className="py-24 lg:py-32">
-        <div className="w-full px-8 lg:px-16 max-w-[1400px] mx-auto">
-          <SectionTitle icon={Mail} title="Контакты" />
-
-          <div className="relative rounded-2xl border border-zinc-800/50 bg-gradient-to-br from-zinc-900/50 via-zinc-900/30 to-zinc-900/50 p-8 lg:p-12 overflow-hidden">
-            {/* Grid pattern */}
-            <div className="absolute inset-0 opacity-[0.02]" style={{
-              backgroundImage: 'linear-gradient(rgba(234,179,8,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(234,179,8,0.3) 1px, transparent 1px)',
-              backgroundSize: '50px 50px',
-            }} />
-            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-yellow-500/[0.04] to-transparent pointer-events-none" />
-
-            <div className="relative space-y-8">
-              <div>
-                <h3 className="text-3xl lg:text-4xl font-bold">Давайте работать вместе</h3>
-                <p className="text-zinc-500 mt-3 text-lg">
-                  Backend / Full-Stack Developer (Go) · Удалённая работа
-                </p>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                {[
-                  { icon: Phone, label: '+7 911 645-98-85', href: 'tel:+79116459885' },
-                  { icon: Mail, label: 'aborigen.nm@gmail.com', href: 'mailto:aborigen.nm@gmail.com' },
-                  { icon: Github, label: 'github.com/xlurr', href: 'https://github.com/xlurr' },
-                  { icon: MapPin, label: 'Великий Новгород', href: null },
-                ].map((c) => {
-                  const Icon = c.icon
-                  const inner = (
-                    <div className="flex items-center gap-4 p-5 rounded-xl border border-zinc-800/50 bg-zinc-900/30 hover:border-yellow-500/[0.15] hover:bg-zinc-900/50 transition-all duration-300 group/c h-full">
-                      <div className="h-11 w-11 rounded-lg bg-yellow-500/[0.06] border border-yellow-500/[0.08] flex items-center justify-center shrink-0 group-hover/c:bg-yellow-500/[0.1] transition-colors">
-                        <Icon className="h-5 w-5 text-yellow-500/60 group-hover/c:text-yellow-400 transition-colors" />
-                      </div>
-                      <div className="min-w-0">
-                        <span className="text-sm font-medium block truncate">{c.label}</span>
-                      </div>
-                    </div>
-                  )
-                  return c.href ? (
-                    <a key={c.label} href={c.href} target="_blank" rel="noopener noreferrer">{inner}</a>
-                  ) : (
-                    <div key={c.label}>{inner}</div>
+                      <p className="text-3xl font-bold mb-1">
+                        {metric.value.includes('+') ? (
+                          <><AnimatedCounter value={parseInt(metric.value)} />+</>
+                        ) : (
+                          <AnimatedCounter value={parseInt(metric.value)} />
+                        )}
+                      </p>
+                      <p className="text-sm text-zinc-500">{metric.label}</p>
+                    </GlowCard>
                   )
                 })}
               </div>
-
-              <div className="flex flex-wrap gap-2 pt-2">
-                {['Русский — родной', 'Английский — B1-B2 (техн. документация, код)'].map((l) => (
-                  <span key={l} className="px-4 py-2 text-sm rounded-lg border border-zinc-800 text-zinc-400 bg-zinc-900/30">
-                    {l}
-                  </span>
-                ))}
-              </div>
             </div>
           </div>
-        </div>
-      </FullSection>
+        </section>
 
-      {/* ── Footer ── */}
-      <footer className="w-full border-t border-zinc-800/50 py-8">
-        <div className="w-full px-8 lg:px-16 flex items-center justify-between text-sm text-zinc-600">
-          <span>2026 · Никита Мосягин</span>
-          <div className="flex items-center gap-5">
-            <a href="#about" className="hover:text-yellow-500 transition-colors flex items-center gap-1.5">
-              <ArrowUp className="h-3.5 w-3.5" /> Наверх
-            </a>
+        {/* ═══════════════════════════════════════════════════════════════ */}
+        {/* TECH STACK */}
+        {/* ═══════════════════════════════════════════════════════════════ */}
+        <section className="px-6 lg:px-16 py-20">
+          <div className="w-full max-w-7xl mx-auto">
+            <div className="flex items-center gap-4 mb-12">
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-yellow-500 to-amber-500 flex items-center justify-center">
+                <Terminal className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold">Tech Stack</h2>
+                <p className="text-zinc-500">Технологии, с которыми работаю каждый день</p>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {Object.entries(STACK).map(([category, techs]) => (
+                <GlowCard key={category} className="p-6">
+                  <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">
+                    {category}
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {techs.map((tech) => (
+                      <TechBadge key={tech} name={tech} />
+                    ))}
+                  </div>
+                </GlowCard>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════════ */}
+        {/* EXPERIENCE */}
+        {/* ═══════════════════════════════════════════════════════════════ */}
+        <section className="px-6 lg:px-16 py-20">
+          <div className="w-full max-w-7xl mx-auto">
+            <div className="flex items-center gap-4 mb-12">
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                <Briefcase className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold">Опыт работы</h2>
+                <p className="text-zinc-500">Production проекты и коммерческая разработка</p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              {EXPERIENCE.map((exp, i) => (
+                <GlowCard
+                  key={i}
+                  className={cn('p-8', exp.highlight && 'border-yellow-500/20 bg-yellow-500/[0.02]')}
+                  glow={exp.highlight ? 'yellow' : 'blue'}
+                >
+                  <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6 mb-6">
+                    <div>
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-xl font-bold">{exp.role}</h3>
+                        {exp.highlight && (
+                          <span className="px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400 text-xs font-medium">
+                            Production
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-lg text-zinc-400">{exp.company}</p>
+                      <div className="flex items-center gap-3 mt-2 text-sm text-zinc-500">
+                        <span>{exp.type}</span>
+                        {exp.location && (
+                          <>
+                            <span>•</span>
+                            <span className="flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />
+                              {exp.location}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <span className="text-sm text-zinc-500 font-mono bg-white/[0.03] px-4 py-2 rounded-lg">
+                      {exp.period}
+                    </span>
+                  </div>
+
+                  <p className="text-zinc-400 mb-6">{exp.description}</p>
+
+                  <div className="grid md:grid-cols-2 gap-3 mb-6">
+                    {exp.achievements.map((achievement, j) => (
+                      <div
+                        key={j}
+                        className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.05]"
+                      >
+                        <CheckCircle2 className="h-5 w-5 text-green-400 shrink-0 mt-0.5" />
+                        <span className="text-sm text-zinc-300">{achievement}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {exp.stack.map((tech) => (
+                      <TechBadge key={tech} name={tech} size="sm" />
+                    ))}
+                  </div>
+                </GlowCard>
+              ))}
+
+              {/* Hackathon */}
+              <GlowCard className="p-8 border-amber-500/20" glow="yellow">
+                <div className="flex items-start gap-4">
+                  <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shrink-0">
+                    <Trophy className="h-7 w-7 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-1">НорНикель Digital Hack 2024</h3>
+                    <p className="text-amber-400 text-sm font-medium mb-3">Финалист хакатона</p>
+                    <p className="text-zinc-400">
+                      Разработка прототипа по кейсу компании за 48 часов. Работа под давлением,
+                      быстрая итерация, защита решения перед техническим жюри.
+                    </p>
+                  </div>
+                </div>
+              </GlowCard>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════════ */}
+        {/* PROJECTS */}
+        {/* ═══════════════════════════════════════════════════════════════ */}
+        <section className="px-6 lg:px-16 py-20">
+          <div className="w-full max-w-7xl mx-auto">
+            <div className="flex items-center gap-4 mb-12">
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                <Layers className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold">Проекты</h2>
+                <p className="text-zinc-500">Open source и pet-проекты</p>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              {PROJECTS.map((proj) => (
+                <GlowCard key={proj.name} className="p-6 flex flex-col" glow="purple">
+                  <div className={cn(
+                    'h-2 rounded-full bg-gradient-to-r mb-6',
+                    proj.gradient
+                  )} />
+
+                  <h3 className="text-lg font-bold mb-2">{proj.name}</h3>
+                  <p className="text-sm text-zinc-400 mb-4 flex-1">{proj.desc}</p>
+
+                  <div className="flex flex-wrap gap-1.5 mb-4">
+                    {proj.stack.map((tech) => (
+                      <TechBadge key={tech} name={tech} size="sm" />
+                    ))}
+                  </div>
+
+                  <div className="flex gap-2">
+                    {proj.dashboardUrl ? (
+                      <>
+                        <a
+                          href={proj.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-sm rounded-lg border border-white/[0.1] hover:bg-white/[0.05] transition-all"
+                        >
+                          Сайт <ExternalLink className="h-3 w-3" />
+                        </a>
+                        <a
+                          href={proj.dashboardUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-sm rounded-lg border border-white/[0.1] hover:bg-white/[0.05] transition-all"
+                        >
+                          Dashboard <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </>
+                    ) : (
+                      <a
+                        href={proj.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 text-sm rounded-lg border border-white/[0.1] hover:bg-white/[0.05] transition-all"
+                      >
+                        Открыть <ExternalLink className="h-3 w-3" />
+                      </a>
+                    )}
+                  </div>
+                </GlowCard>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════════ */}
+        {/* SKILLS */}
+        {/* ═══════════════════════════════════════════════════════════════ */}
+        <section className="px-6 lg:px-16 py-20">
+          <div className="w-full max-w-7xl mx-auto">
+            <div className="flex items-center gap-4 mb-12">
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
+                <Code2 className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold">Навыки</h2>
+                <p className="text-zinc-500">Технические и софт скиллы</p>
+              </div>
+            </div>
+
+            <div className="grid lg:grid-cols-2 gap-8">
+              {/* Technical skills */}
+              <GlowCard className="p-8" glow="green">
+                <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
+                  <Terminal className="h-5 w-5 text-yellow-500" />
+                  Hard Skills
+                </h3>
+                <div className="space-y-5">
+                  {SKILLS.map((skill) => (
+                    <SkillBar key={skill.name} name={skill.name} level={skill.level} />
+                  ))}
+                </div>
+              </GlowCard>
+
+              {/* Soft skills */}
+              <GlowCard className="p-8" glow="blue">
+                <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
+                  <Users className="h-5 w-5 text-blue-500" />
+                  Soft Skills
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {SOFT_SKILLS.map((skill) => {
+                    const Icon = skill.icon
+                    return (
+                      <div
+                        key={skill.name}
+                        className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:border-white/[0.1] transition-all"
+                      >
+                        <Icon className="h-5 w-5 text-yellow-500 mb-2" />
+                        <h4 className="font-medium text-sm mb-1">{skill.name}</h4>
+                        <p className="text-xs text-zinc-500">{skill.desc}</p>
+                      </div>
+                    )
+                  })}
+                </div>
+              </GlowCard>
+            </div>
+
+            {/* AI tools note */}
+            <GlowCard className="mt-8 p-6 border-yellow-500/20" glow="yellow">
+              <div className="flex items-start gap-4">
+                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-yellow-500 to-amber-500 flex items-center justify-center shrink-0">
+                  <Brain className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-1">AI-инструменты как мультипликатор продуктивности</h4>
+                  <p className="text-sm text-zinc-400">
+                    Использую Claude, Cursor и Copilot для ускорения разработки. LLM — это инструмент,
+                    а не замена инженерного мышления. Всегда верифицирую генерируемый код.
+                  </p>
+                </div>
+              </div>
+            </GlowCard>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════════ */}
+        {/* EDUCATION */}
+        {/* ═══════════════════════════════════════════════════════════════ */}
+        <section className="px-6 lg:px-16 py-20">
+          <div className="w-full max-w-7xl mx-auto">
+            <div className="flex items-center gap-4 mb-12">
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center">
+                <GraduationCap className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold">Образование</h2>
+                <p className="text-zinc-500">Академическая база и дополнительное обучение</p>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <GlowCard className="p-8" glow="purple">
+                <div className="flex items-start gap-4 mb-6">
+                  <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shrink-0">
+                    <GraduationCap className="h-7 w-7 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold">{EDUCATION.university}</h3>
+                    <p className="text-zinc-400">{EDUCATION.degree}</p>
+                    <p className="text-sm text-yellow-500 font-medium mt-1">Выпуск {EDUCATION.year}</p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {EDUCATION.courses.map((course) => (
+                    <TechBadge key={course} name={course} size="sm" />
+                  ))}
+                </div>
+              </GlowCard>
+
+              <GlowCard className="p-8 border-green-500/20" glow="green">
+                <div className="flex items-start gap-4">
+                  <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center shrink-0">
+                    <Shield className="h-7 w-7 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold">Военная кафедра</h3>
+                    <p className="text-green-400 text-sm font-medium mb-3">Пройдена полностью</p>
+                    <p className="text-sm text-zinc-400">
+                      Работа в условиях давления, принятие решений при неполной информации,
+                      ответственность за результат команды.
+                    </p>
+                  </div>
+                </div>
+              </GlowCard>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════════ */}
+        {/* CONTACT */}
+        {/* ═══════════════════════════════════════════════════════════════ */}
+        <section className="px-6 lg:px-16 py-20">
+          <div className="w-full max-w-7xl mx-auto">
+            <GlowCard className="p-12 text-center" glow="yellow">
+              <h2 className="text-4xl font-bold mb-4">Давайте работать вместе</h2>
+              <p className="text-xl text-zinc-400 mb-8 max-w-2xl mx-auto">
+                Ищу позицию Backend / Full-Stack Developer с фокусом на Go.
+                Готов к удалённой работе и релокации.
+              </p>
+
+              <div className="flex flex-wrap justify-center gap-4 mb-8">
+                <a
+                  href={`tel:${PERSONAL.phone.replace(/\s/g, '')}`}
+                  className="inline-flex items-center gap-3 px-6 py-4 rounded-xl border border-white/[0.1] bg-white/[0.02] hover:bg-white/[0.05] transition-all"
+                >
+                  <Phone className="h-5 w-5 text-green-500" />
+                  <span>{PERSONAL.phone}</span>
+                </a>
+                <a
+                  href={`mailto:${PERSONAL.email}`}
+                  className="inline-flex items-center gap-3 px-6 py-4 rounded-xl border border-white/[0.1] bg-white/[0.02] hover:bg-white/[0.05] transition-all"
+                >
+                  <Mail className="h-5 w-5 text-blue-500" />
+                  <span>{PERSONAL.email}</span>
+                </a>
+                <a
+                  href={`https://github.com/${PERSONAL.github}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-3 px-6 py-4 rounded-xl border border-white/[0.1] bg-white/[0.02] hover:bg-white/[0.05] transition-all"
+                >
+                  <Github className="h-5 w-5 text-purple-500" />
+                  <span>github.com/{PERSONAL.github}</span>
+                </a>
+                <div className="inline-flex items-center gap-3 px-6 py-4 rounded-xl border border-white/[0.1] bg-white/[0.02]">
+                  <MapPin className="h-5 w-5 text-orange-500" />
+                  <span>{PERSONAL.location}</span>
+                </div>
+              </div>
+
+              <div className="flex justify-center gap-3">
+                <span className="px-4 py-2 rounded-lg bg-white/[0.03] text-sm text-zinc-400">
+                  Русский — родной
+                </span>
+                <span className="px-4 py-2 rounded-lg bg-white/[0.03] text-sm text-zinc-400">
+                  English — B1-B2
+                </span>
+              </div>
+            </GlowCard>
+          </div>
+        </section>
+
+        {/* Footer */}
+        <footer className="px-6 lg:px-16 py-8 border-t border-white/[0.05]">
+          <div className="w-full max-w-7xl mx-auto flex items-center justify-between text-sm text-zinc-500">
+            <span>© 2026 Никита Мосягин</span>
             <a
-              href="https://github.com/xlurr"
+              href={`https://github.com/${PERSONAL.github}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 hover:text-yellow-500 transition-colors"
+              className="flex items-center gap-2 hover:text-yellow-500 transition-colors"
             >
-              <Github className="h-3.5 w-3.5" /> xlurr
+              <Github className="h-4 w-4" />
+              {PERSONAL.github}
             </a>
           </div>
-        </div>
-      </footer>
+        </footer>
+      </div>
     </div>
   )
 }
