@@ -108,7 +108,7 @@ export function UserProfilePage() {
       </div>
 
       {/* Profile card */}
-      <PageHero theme="rose" compact>
+      <PageHero compact>
         <div className="flex items-start gap-6">
           <div className="h-20 w-20 rounded-2xl bg-background/60 dark:bg-card/60 backdrop-blur-sm text-foreground/70 text-2xl font-bold flex items-center justify-center shrink-0 border border-border/50 shadow-sm">
             {profileUser.avatar}

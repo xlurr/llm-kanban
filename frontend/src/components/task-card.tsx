@@ -5,7 +5,8 @@ import type { Task } from '@/lib/types'
 import { useAgentsStore } from '@/stores/agents-store'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Clock, CalendarClock, CheckSquare } from 'lucide-react'
+import { PipelineMini } from '@/components/pipeline-stages'
+import { Clock, CalendarClock, CheckSquare, Paperclip } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const priorityColors: Record<string, string> = {
@@ -54,8 +55,8 @@ export function TaskCard({ task, isDragOverlay, epicName }: TaskCardProps) {
       style={style}
       className={cn(
         'group relative rounded-xl border bg-card overflow-hidden cursor-grab active:cursor-grabbing',
-        'transition-all duration-200',
-        'hover:shadow-lg hover:shadow-foreground/5 dark:hover:shadow-primary/5 hover:border-foreground/10 dark:hover:border-primary/30 hover:-translate-y-0.5',
+        'transition-all duration-300',
+        'hover:shadow-lg hover:shadow-foreground/5 dark:hover:shadow-primary/5 hover:border-foreground/10 dark:hover:border-primary/30 hover:-translate-y-1',
         isDragging && 'opacity-40 shadow-xl scale-[0.98]',
         isDragOverlay && 'shadow-2xl shadow-foreground/10 dark:shadow-primary/20 rotate-[2deg] scale-105 border-foreground/15 dark:border-primary/40'
       )}
@@ -93,6 +94,11 @@ export function TaskCard({ task, isDragOverlay, epicName }: TaskCardProps) {
           </div>
         )}
 
+        {/* Pipeline mini indicator */}
+        {task.pipelines && task.pipelines.length > 0 && (
+          <PipelineMini pipeline={task.pipelines[task.pipelines.length - 1]} />
+        )}
+
         <div className="flex items-center justify-between text-[11px] text-muted-foreground">
           <div className="flex items-center gap-2.5">
             <div className="flex items-center gap-1">
@@ -108,6 +114,11 @@ export function TaskCard({ task, isDragOverlay, epicName }: TaskCardProps) {
               <div className={cn('flex items-center gap-1', isOverdue && 'text-red-400 font-medium')}>
                 <CalendarClock className="h-3 w-3" />
                 {new Date(task.deadline).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}
+              </div>
+            )}
+            {task.attachments && task.attachments.length > 0 && (
+              <div className="flex items-center gap-1">
+                <Paperclip className="h-3 w-3" />{task.attachments.length}
               </div>
             )}
           </div>

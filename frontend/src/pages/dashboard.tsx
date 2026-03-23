@@ -12,12 +12,13 @@ import { Progress } from '@/components/ui/progress'
 import {
   ListChecks, CheckCircle2, AlertTriangle, Clock, TrendingUp,
   Star, Activity, Flame, CalendarClock, Tag, Bot, Users,
-  ArrowUpRight, ArrowDownRight, Minus, Zap, Cpu, Shield, Eye,
+  Cpu,
 } from 'lucide-react'
+import { HeroIllustration } from '@/components/animated-robot'
 import { cn } from '@/lib/utils'
 import {
   AreaChart, Area, BarChart as RBarChart, Bar, RadialBarChart, RadialBar,
-  PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer,
+  PieChart, Pie, Cell, ResponsiveContainer,
   XAxis, YAxis, Tooltip, CartesianGrid,
 } from 'recharts'
 
@@ -45,165 +46,6 @@ const priorityLabels: Record<string, string> = {
   medium: 'Средний',
   high: 'Высокий',
   critical: 'Критический',
-}
-
-// ── Animated Robot SVG ──
-
-function AnimatedRobot() {
-  return (
-    <div className="relative w-[280px] h-[280px] select-none">
-      {/* Glow backdrop */}
-      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-violet-500/20 via-cyan-500/10 to-transparent blur-3xl animate-pulse" />
-
-      <svg viewBox="0 0 280 280" className="w-full h-full relative z-10">
-        <defs>
-          {/* Gradients */}
-          <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#8b5cf6" />
-            <stop offset="100%" stopColor="#6d28d9" />
-          </linearGradient>
-          <linearGradient id="headGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#a78bfa" />
-            <stop offset="100%" stopColor="#7c3aed" />
-          </linearGradient>
-          <linearGradient id="screenGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#0f172a" />
-            <stop offset="100%" stopColor="#1e293b" />
-          </linearGradient>
-          <linearGradient id="armGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#7c3aed" />
-            <stop offset="100%" stopColor="#5b21b6" />
-          </linearGradient>
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="3" result="blur" />
-            <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-          </filter>
-          <filter id="softShadow">
-            <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="#0008" />
-          </filter>
-        </defs>
-
-        {/* Shadow on ground */}
-        <ellipse cx="140" cy="265" rx="60" ry="8" fill="#0002" />
-
-        {/* Legs */}
-        <rect x="108" y="210" width="18" height="40" rx="6" fill="url(#armGrad)" />
-        <rect x="154" y="210" width="18" height="40" rx="6" fill="url(#armGrad)" />
-        {/* Feet */}
-        <rect x="102" y="244" width="30" height="12" rx="6" fill="#5b21b6" />
-        <rect x="148" y="244" width="30" height="12" rx="6" fill="#5b21b6" />
-
-        {/* Body */}
-        <rect x="90" y="130" width="100" height="90" rx="20" fill="url(#bodyGrad)" filter="url(#softShadow)" />
-        {/* Chest screen */}
-        <rect x="105" y="145" width="70" height="45" rx="10" fill="url(#screenGrad)" />
-        {/* Chest bars animated */}
-        <g>
-          <rect x="113" y="168" width="8" height="14" rx="2" fill="#22d3ee" opacity="0.9">
-            <animate attributeName="height" values="14;8;14" dur="1.5s" repeatCount="indefinite" />
-            <animate attributeName="y" values="168;174;168" dur="1.5s" repeatCount="indefinite" />
-          </rect>
-          <rect x="125" y="162" width="8" height="20" rx="2" fill="#34d399" opacity="0.9">
-            <animate attributeName="height" values="20;10;20" dur="1.8s" repeatCount="indefinite" />
-            <animate attributeName="y" values="162;172;162" dur="1.8s" repeatCount="indefinite" />
-          </rect>
-          <rect x="137" y="165" width="8" height="17" rx="2" fill="#a78bfa" opacity="0.9">
-            <animate attributeName="height" values="17;6;17" dur="1.3s" repeatCount="indefinite" />
-            <animate attributeName="y" values="165;176;165" dur="1.3s" repeatCount="indefinite" />
-          </rect>
-          <rect x="149" y="160" width="8" height="22" rx="2" fill="#f472b6" opacity="0.9">
-            <animate attributeName="height" values="22;12;22" dur="2s" repeatCount="indefinite" />
-            <animate attributeName="y" values="160;170;160" dur="2s" repeatCount="indefinite" />
-          </rect>
-          <rect x="161" y="166" width="8" height="16" rx="2" fill="#fbbf24" opacity="0.9">
-            <animate attributeName="height" values="16;7;16" dur="1.6s" repeatCount="indefinite" />
-            <animate attributeName="y" values="166;175;166" dur="1.6s" repeatCount="indefinite" />
-          </rect>
-        </g>
-        {/* Chest heart / power indicator */}
-        <circle cx="140" cy="152" r="3" fill="#22d3ee" filter="url(#glow)">
-          <animate attributeName="r" values="3;4;3" dur="2s" repeatCount="indefinite" />
-          <animate attributeName="opacity" values="1;0.6;1" dur="2s" repeatCount="indefinite" />
-        </circle>
-
-        {/* Left arm */}
-        <g>
-          <rect x="62" y="140" width="20" height="55" rx="10" fill="url(#armGrad)">
-            <animateTransform attributeName="transform" type="rotate" values="0 72 140;-8 72 140;0 72 140" dur="3s" repeatCount="indefinite" />
-          </rect>
-          {/* Left hand */}
-          <circle cx="72" cy="200" r="10" fill="#7c3aed">
-            <animateTransform attributeName="transform" type="rotate" values="0 72 140;-8 72 140;0 72 140" dur="3s" repeatCount="indefinite" />
-          </circle>
-        </g>
-        {/* Right arm */}
-        <g>
-          <rect x="198" y="140" width="20" height="55" rx="10" fill="url(#armGrad)">
-            <animateTransform attributeName="transform" type="rotate" values="0 208 140;8 208 140;0 208 140" dur="3s" repeatCount="indefinite" begin="0.3s" />
-          </rect>
-          <circle cx="208" cy="200" r="10" fill="#7c3aed">
-            <animateTransform attributeName="transform" type="rotate" values="0 208 140;8 208 140;0 208 140" dur="3s" repeatCount="indefinite" begin="0.3s" />
-          </circle>
-        </g>
-
-        {/* Neck */}
-        <rect x="127" y="110" width="26" height="25" rx="8" fill="#6d28d9" />
-
-        {/* Head */}
-        <rect x="88" y="35" width="104" height="85" rx="24" fill="url(#headGrad)" filter="url(#softShadow)" />
-
-        {/* Antenna */}
-        <line x1="140" y1="35" x2="140" y2="12" stroke="#a78bfa" strokeWidth="3" strokeLinecap="round" />
-        <circle cx="140" cy="10" r="6" fill="#22d3ee" filter="url(#glow)">
-          <animate attributeName="fill" values="#22d3ee;#f472b6;#fbbf24;#22d3ee" dur="4s" repeatCount="indefinite" />
-        </circle>
-
-        {/* Eyes */}
-        <g>
-          {/* Left eye */}
-          <ellipse cx="118" cy="70" rx="14" ry="16" fill="#0f172a" />
-          <ellipse cx="118" cy="70" rx="10" ry="12" fill="#1e293b" />
-          <circle cx="118" cy="68" r="6" fill="#22d3ee" filter="url(#glow)">
-            <animate attributeName="cy" values="68;70;68" dur="3s" repeatCount="indefinite" />
-          </circle>
-          <circle cx="121" cy="65" r="2" fill="#fff" opacity="0.8" />
-
-          {/* Right eye */}
-          <ellipse cx="162" cy="70" rx="14" ry="16" fill="#0f172a" />
-          <ellipse cx="162" cy="70" rx="10" ry="12" fill="#1e293b" />
-          <circle cx="162" cy="68" r="6" fill="#22d3ee" filter="url(#glow)">
-            <animate attributeName="cy" values="68;70;68" dur="3s" repeatCount="indefinite" />
-          </circle>
-          <circle cx="165" cy="65" r="2" fill="#fff" opacity="0.8" />
-        </g>
-
-        {/* Mouth — smile */}
-        <path d="M122 92 Q140 104 158 92" fill="none" stroke="#0f172a" strokeWidth="3" strokeLinecap="round" />
-
-        {/* Ear panels */}
-        <rect x="76" y="55" width="12" height="30" rx="6" fill="#6d28d9" />
-        <rect x="192" y="55" width="12" height="30" rx="6" fill="#6d28d9" />
-
-        {/* Floating particles */}
-        <circle cx="50" cy="50" r="2" fill="#22d3ee" opacity="0.6">
-          <animate attributeName="cy" values="50;30;50" dur="4s" repeatCount="indefinite" />
-          <animate attributeName="opacity" values="0.6;0;0.6" dur="4s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="230" cy="40" r="1.5" fill="#a78bfa" opacity="0.5">
-          <animate attributeName="cy" values="40;20;40" dur="3.5s" repeatCount="indefinite" />
-          <animate attributeName="opacity" values="0.5;0;0.5" dur="3.5s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="45" cy="120" r="1.5" fill="#f472b6" opacity="0.4">
-          <animate attributeName="cy" values="120;100;120" dur="5s" repeatCount="indefinite" />
-          <animate attributeName="opacity" values="0.4;0;0.4" dur="5s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="235" cy="130" r="2" fill="#fbbf24" opacity="0.5">
-          <animate attributeName="cy" values="130;110;130" dur="3s" repeatCount="indefinite" />
-          <animate attributeName="opacity" values="0.5;0;0.5" dur="3s" repeatCount="indefinite" />
-        </circle>
-      </svg>
-    </div>
-  )
 }
 
 // ── Animated counter ──
@@ -235,33 +77,6 @@ function MiniTooltip({ active, payload, label }: any) {
       {payload.map((p: any, i: number) => (
         <p key={i} className="font-medium" style={{ color: p.color }}>{p.name}: {p.value}</p>
       ))}
-    </div>
-  )
-}
-
-// ── Floating status cards for hero ──
-
-function FloatingCard({ icon: Icon, label, value, color, delay, className }: {
-  icon: any; label: string; value: string; color: string; delay: string; className?: string
-}) {
-  return (
-    <div
-      className={cn(
-        'absolute bg-card/80 backdrop-blur-md border border-border/50 rounded-xl px-4 py-3 shadow-lg',
-        'animate-float',
-        className,
-      )}
-      style={{ animationDelay: delay }}
-    >
-      <div className="flex items-center gap-2.5">
-        <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: color + '20' }}>
-          <Icon className="h-4 w-4" style={{ color }} />
-        </div>
-        <div>
-          <p className="text-[10px] text-muted-foreground">{label}</p>
-          <p className="text-sm font-bold">{value}</p>
-        </div>
-      </div>
     </div>
   )
 }
@@ -430,7 +245,7 @@ export function DashboardPage() {
     agents.map((a, i) => ({
       name: a.name,
       value: a.successRate,
-      fill: ['#8b5cf6', '#22d3ee', '#f472b6', '#fbbf24', '#34d399', '#f97316'][i % 6],
+      fill: ['#333', '#555', '#777', '#999', '#bbb', '#444'][i % 6],
     })),
     [agents]
   )
@@ -449,7 +264,7 @@ export function DashboardPage() {
     <div className="space-y-6" data-tour="dashboard-page">
 
       {/* ── Hero Section with Robot ── */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-50 via-background to-indigo-50/30 dark:from-violet-950/50 dark:via-background dark:to-cyan-950/30 border border-border/50 p-8 min-h-[320px]">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-zinc-100/80 via-background to-zinc-50/30 dark:from-zinc-900/50 dark:via-background dark:to-zinc-950/30 border border-border/50 p-8 min-h-[320px]">
         {/* Background grid pattern */}
         <div className="absolute inset-0 opacity-[0.03]" style={{
           backgroundImage: 'linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)',
@@ -457,74 +272,60 @@ export function DashboardPage() {
         }} />
 
         {/* Animated gradient orbs */}
-        <div className="absolute top-10 left-10 w-72 h-72 bg-violet-200/30 dark:bg-violet-500/10 rounded-full blur-[100px] animate-pulse" />
-        <div className="absolute bottom-0 right-20 w-96 h-96 bg-indigo-200/20 dark:bg-cyan-500/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-10 left-10 w-72 h-72 bg-zinc-300/30 dark:bg-white/[0.03] rounded-full blur-[100px] animate-pulse" />
+        <div className="absolute bottom-0 right-20 w-96 h-96 bg-zinc-200/30 dark:bg-white/[0.02] rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
 
-        <div className="relative z-10 flex items-center justify-between gap-8">
-          <div className="flex-1 space-y-4 max-w-lg">
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-xs text-green-500 font-medium tracking-wide uppercase">Система активна</span>
+        <div className="relative z-10 flex items-center gap-8">
+          <div className="flex-1 space-y-5 min-w-0">
+            {/* Title block */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <h1 className="text-4xl font-bold tracking-tight">LLM Kanban</h1>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background/50 backdrop-blur-sm px-2.5 py-0.5 text-[10px] font-medium text-muted-foreground uppercase tracking-widest">
+                  <span className="h-1.5 w-1.5 rounded-full bg-foreground/40 animate-pulse" />
+                  online
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
+                Оркестрация задач для AI-агентов. Создавайте задачи с промптами,
+                назначайте агентов, отслеживайте результаты.
+              </p>
             </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-foreground via-foreground to-violet-400 bg-clip-text text-transparent">
-              LLM Kanban
-            </h1>
-            <p className="text-muted-foreground leading-relaxed">
-              Оркестрация задач для AI-агентов. Создавайте задачи с промптами,
-              назначайте агентов, отслеживайте результаты в реальном времени.
-            </p>
 
             {/* Quick stats row */}
-            <div className="flex items-center gap-6 pt-2">
+            <div className="flex items-center gap-6">
               <div>
                 <p className="text-2xl font-bold"><AnimatedNumber value={stats.total} /></p>
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Задач</p>
               </div>
               <div className="h-8 w-px bg-border" />
               <div>
-                <p className="text-2xl font-bold text-green-500"><AnimatedNumber value={stats.done} /></p>
+                <p className="text-2xl font-bold"><AnimatedNumber value={stats.done} /></p>
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Готово</p>
               </div>
               <div className="h-8 w-px bg-border" />
               <div>
-                <p className="text-2xl font-bold text-violet-500"><AnimatedNumber value={agents.filter(a => a.status !== 'offline').length} /></p>
+                <p className="text-2xl font-bold"><AnimatedNumber value={agents.filter(a => a.status !== 'offline').length} /></p>
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Агентов</p>
               </div>
               <div className="h-8 w-px bg-border" />
               <div>
-                <p className="text-2xl font-bold text-cyan-500">{stats.avgScore.toFixed(1)}</p>
+                <p className="text-2xl font-bold">{stats.avgScore.toFixed(1)}</p>
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Ср. оценка</p>
               </div>
             </div>
           </div>
 
-          {/* Robot */}
-          <div className="relative hidden lg:block -ml-8">
-            <AnimatedRobot />
-
-            {/* Floating status cards around robot */}
-            <FloatingCard
-              icon={Zap} label="Скорость" value="1.2x"
-              color="#fbbf24" delay="0s"
-              className="top-0 -left-24"
-            />
-            <FloatingCard
-              icon={Shield} label="Успешность" value={`${agents[0]?.successRate || 95}%`}
-              color="#22c55e" delay="0.5s"
-              className="top-16 -right-20"
-            />
-            <FloatingCard
-              icon={Eye} label="Мониторинг" value="24/7"
-              color="#8b5cf6" delay="1s"
-              className="bottom-12 -left-16"
-            />
+          {/* Illustration — contained, no overflow */}
+          <div className="hidden lg:block shrink-0 w-[280px] h-[280px]">
+            <HeroIllustration size={280} />
           </div>
         </div>
       </div>
 
       {/* ── Row 1: KPI Cards ── */}
       <div data-tour="dashboard-stats" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="group hover:shadow-lg hover:shadow-violet-500/5 transition-all duration-300">
+        <Card className="group hover:shadow-lg hover:shadow-foreground/5 transition-all duration-300">
           <CardContent className="pt-5 pb-4">
             <div className="flex items-center justify-between">
               <div>
@@ -608,20 +409,20 @@ export function DashboardPage() {
                 <AreaChart data={creationChart}>
                   <defs>
                     <linearGradient id="gradTasks" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} />
+                      <stop offset="0%" stopColor="hsl(var(--foreground))" stopOpacity={0.15} />
+                      <stop offset="100%" stopColor="hsl(var(--foreground))" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="gradDone" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#22c55e" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="#22c55e" stopOpacity={0} />
+                      <stop offset="0%" stopColor="hsl(var(--muted-foreground))" stopOpacity={0.15} />
+                      <stop offset="100%" stopColor="hsl(var(--muted-foreground))" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
                   <XAxis dataKey="day" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={30} />
                   <Tooltip content={<MiniTooltip />} />
-                  <Area type="monotone" dataKey="tasks" name="Создано" stroke="#8b5cf6" fill="url(#gradTasks)" strokeWidth={2} dot={false} />
-                  <Area type="monotone" dataKey="done" name="Завершено" stroke="#22c55e" fill="url(#gradDone)" strokeWidth={2} dot={false} />
+                  <Area type="monotone" dataKey="tasks" name="Создано" stroke="hsl(var(--foreground))" fill="url(#gradTasks)" strokeWidth={2} dot={false} />
+                  <Area type="monotone" dataKey="done" name="Завершено" stroke="hsl(var(--muted-foreground))" fill="url(#gradDone)" strokeWidth={2} dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -769,7 +570,7 @@ export function DashboardPage() {
                   <Tooltip content={<MiniTooltip />} />
                   <Bar dataKey="value" name="Задач" radius={[3, 3, 0, 0]}>
                     {heatmapData.map((entry, i) => (
-                      <Cell key={i} fill={`hsl(${260 - (entry.value * 20)}, 70%, ${55 + Math.max(0, 30 - entry.value * 5)}%)`} />
+                      <Cell key={i} fill={`hsl(0, 0%, ${Math.max(20, 75 - entry.value * 8)}%)`} />
                     ))}
                   </Bar>
                 </RBarChart>

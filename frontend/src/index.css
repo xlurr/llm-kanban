@@ -135,6 +135,30 @@
   }
 }
 
+/* Glow pulse — for status indicators and active elements */
+@keyframes glow-ring {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(var(--foreground) / 0.15); }
+  50% { box-shadow: 0 0 0 6px hsl(var(--foreground) / 0); }
+}
+
+/* Marquee text — for overflow badges or tickers */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Bounce subtle — for attention */
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* Border gradient spin — decorative borders */
+@keyframes border-spin {
+  0% { --angle: 0deg; }
+  100% { --angle: 360deg; }
+}
+
 @layer utilities {
   .animate-fade-in-up {
     animation: fade-in-up 0.4s ease-out both;
@@ -161,6 +185,12 @@
   }
   .animate-pulse-glow {
     animation: pulse-glow 2s ease-in-out infinite;
+  }
+  .animate-glow-ring {
+    animation: glow-ring 2s ease-in-out infinite;
+  }
+  .animate-bounce-subtle {
+    animation: bounce-subtle 2s ease-in-out infinite;
   }
 
   /* Stagger children animations */

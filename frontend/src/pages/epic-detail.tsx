@@ -18,6 +18,7 @@ import {
   Plus, Save, X, Clock, Bot, Flame, TrendingUp, AlertCircle,
 } from 'lucide-react'
 import { PageHero } from '@/components/page-hero'
+import { AttachmentsPanel } from '@/components/attachments-panel'
 import { cn } from '@/lib/utils'
 import type { EpicStatus } from '@/lib/types'
 
@@ -50,7 +51,7 @@ const priorityLabels: Record<string, { label: string; class: string }> = {
 export function EpicDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { epics, updateEpic, deleteEpic } = useEpicsStore()
+  const { epics, updateEpic, deleteEpic, addAttachment, removeAttachment } = useEpicsStore()
   const { tasks, updateTask } = useTasksStore()
   const { columns } = useBoardStore()
   const { agents } = useAgentsStore()
@@ -156,7 +157,7 @@ export function EpicDetailPage() {
       </div>
 
       {/* Epic info */}
-      <PageHero theme="amber" compact>
+      <PageHero compact>
         <div className="space-y-4">
           {editing ? (
             <>
@@ -247,7 +248,7 @@ export function EpicDetailPage() {
 
       {/* Stats cards */}
       {!editing && (
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-4 stagger-children">
           <Card>
             <CardContent className="pt-5 pb-4">
               <div className="flex items-center gap-3">
@@ -396,6 +397,15 @@ export function EpicDetailPage() {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* Attachments */}
+      {!editing && (
+        <AttachmentsPanel
+          attachments={epic.attachments || []}
+          onAdd={(data) => addAttachment(epic.id, data)}
+          onRemove={(attId) => removeAttachment(epic.id, attId)}
+        />
       )}
 
       {/* Tasks list */}

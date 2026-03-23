@@ -20,6 +20,8 @@ import {
 } from 'lucide-react'
 import { DynamicIcon } from '@/components/ui/dynamic-icon'
 import { PageHero } from '@/components/page-hero'
+import { PipelinesSection } from '@/components/pipeline-stages'
+import { AttachmentsPanel } from '@/components/attachments-panel'
 import { cn } from '@/lib/utils'
 import type { TaskPriority } from '@/lib/types'
 
@@ -56,6 +58,7 @@ export function TaskDetailPage() {
     tasks, updateTask, startExecution, moveTask, assignAgent,
     addSubtask, toggleSubtask, removeSubtask,
     addComment, removeComment,
+    addAttachment, removeAttachment, triggerPipeline,
   } = useTasksStore()
   const { agents } = useAgentsStore()
   const { columns, getAllowedTargets } = useBoardStore()
@@ -176,7 +179,7 @@ export function TaskDetailPage() {
       </div>
 
       {/* Title & meta — editable */}
-      <PageHero theme="blue" compact>
+      <PageHero compact>
         <div className="h-1.5 rounded-full mb-4 w-16" style={{ backgroundColor: editing ? editColor : task.color }} />
         <div className="space-y-3">
           {editing ? (
@@ -275,7 +278,7 @@ export function TaskDetailPage() {
 
       {/* Info cards */}
       {!editing && (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 stagger-children">
           <Card>
             <CardContent className="pt-5 pb-4 space-y-2">
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
@@ -499,6 +502,23 @@ export function TaskDetailPage() {
             <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg p-3">{task.review.comment}</p>
           </CardContent>
         </Card>
+      )}
+
+      {/* CI/CD Pipeline */}
+      {!editing && (
+        <PipelinesSection
+          pipelines={task.pipelines || []}
+          onTrigger={() => triggerPipeline(task.id, 'main', Math.random().toString(36).slice(2, 9))}
+        />
+      )}
+
+      {/* Attachments */}
+      {!editing && (
+        <AttachmentsPanel
+          attachments={task.attachments || []}
+          onAdd={(data) => addAttachment(task.id, data)}
+          onRemove={(attId) => removeAttachment(task.id, attId)}
+        />
       )}
 
       {/* Comments */}

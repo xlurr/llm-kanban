@@ -1,21 +1,75 @@
+import { useState, useRef, useEffect } from 'react'
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/stores/auth-store'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { ProductTour, StartTourButton } from '@/components/product-tour'
-import { LayoutDashboard, KanbanSquare, ListChecks, LogOut, Bot, Layers, Database, Network, Users, Cpu } from 'lucide-react'
+import { LayoutDashboard, KanbanSquare, ListChecks, LogOut, Bot, Layers, Database, Network, Users, Cpu, FileText, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-const navItems = [
+const mainNavItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Дашборд' },
   { to: '/board', icon: KanbanSquare, label: 'Канбан' },
   { to: '/tasks', icon: ListChecks, label: 'Мониторинг' },
   { to: '/epics', icon: Layers, label: 'Эпики' },
+]
+
+const schemaNavItems = [
   { to: '/diagrams', icon: Database, label: 'Схема БД' },
   { to: '/architecture', icon: Network, label: 'Архитектура' },
   { to: '/use-cases', icon: Users, label: 'Прецеденты' },
   { to: '/tech-stack', icon: Cpu, label: 'Технологии' },
 ]
+
+const allNavItems = [...mainNavItems, ...schemaNavItems]
+
+function SchemaDropdown({ pathname }: { pathname: string }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  const isSchemaActive = schemaNavItems.some((i) => pathname === i.to || pathname.startsWith(i.to + '/'))
+  const activeItem = schemaNavItems.find((i) => pathname === i.to || pathname.startsWith(i.to + '/'))
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  return (
+    <div ref={ref} className="relative">
+      <Button
+        variant={isSchemaActive ? 'secondary' : 'ghost'}
+        size="sm"
+        className={cn('gap-2 transition-all', isSchemaActive && 'shadow-sm')}
+        onClick={() => setOpen(!open)}
+      >
+        <FileText className="h-4 w-4" />
+        {activeItem ? activeItem.label : 'Документация'}
+        <ChevronDown className={cn('h-3 w-3 transition-transform', open && 'rotate-180')} />
+      </Button>
+      {open && (
+        <div className="absolute top-full left-0 mt-1.5 w-52 rounded-xl border bg-popover shadow-xl shadow-foreground/5 p-1.5 animate-scale-in z-50">
+          {schemaNavItems.map(({ to, icon: Icon, label }) => {
+            const isActive = pathname === to || pathname.startsWith(to + '/')
+            return (
+              <Link key={to} to={to} onClick={() => setOpen(false)}>
+                <div className={cn(
+                  'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors',
+                  isActive ? 'bg-secondary font-medium' : 'hover:bg-muted'
+                )}>
+                  <Icon className="h-4 w-4 text-muted-foreground" />
+                  {label}
+                </div>
+              </Link>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export function Layout() {
   const { user, logout } = useAuthStore()
@@ -41,7 +95,7 @@ export function Layout() {
               <span className="hidden sm:inline tracking-tight">LLM Kanban</span>
             </Link>
             <nav data-tour="main-nav" className="hidden md:flex items-center gap-0.5">
-              {navItems.map(({ to, icon: Icon, label }) => {
+              {mainNavItems.map(({ to, icon: Icon, label }) => {
                 const isActive = location.pathname === to || location.pathname.startsWith(to + '/')
                 return (
                   <Link key={to} to={to}>
@@ -59,6 +113,7 @@ export function Layout() {
                   </Link>
                 )
               })}
+              <SchemaDropdown pathname={location.pathname} />
             </nav>
           </div>
           <div className="flex items-center gap-2">
@@ -83,7 +138,7 @@ export function Layout() {
       {/* Mobile nav */}
       <nav className="md:hidden sticky top-14 z-30 border-b glass">
         <div className="container mx-auto flex gap-1 px-4 py-1.5 overflow-x-auto">
-          {navItems.map(({ to, icon: Icon, label }) => {
+          {allNavItems.map(({ to, icon: Icon, label }) => {
             const isActive = location.pathname === to
             return (
               <Link key={to} to={to}>

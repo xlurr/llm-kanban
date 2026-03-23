@@ -41,6 +41,44 @@ export interface TaskComment {
   timestamp: number
 }
 
+// ── CI/CD Pipeline ──
+
+export type PipelineStageStatus = 'pending' | 'running' | 'success' | 'failed' | 'skipped'
+
+export interface PipelineStage {
+  id: string
+  name: string
+  status: PipelineStageStatus
+  startedAt: number | null
+  finishedAt: number | null
+  log: string // last output line
+  needs?: string[] // job IDs this stage depends on (DAG)
+}
+
+export interface Pipeline {
+  id: string
+  runNumber: number
+  branch: string
+  commit: string // short hash
+  status: PipelineStageStatus // overall
+  stages: PipelineStage[]
+  triggeredAt: number
+  url: string // github actions link
+}
+
+// ── Attachments ──
+
+export type AttachmentType = 'link' | 'image' | 'file'
+
+export interface Attachment {
+  id: string
+  type: AttachmentType
+  name: string
+  url: string // URL or data-uri for images
+  addedAt: number
+  addedBy: string
+}
+
 export interface Task {
   id: string
   title: string
@@ -62,6 +100,8 @@ export interface Task {
   subtasks: Subtask[]
   comments: TaskComment[]
   color: string // hex color for left border accent
+  pipelines?: Pipeline[]
+  attachments?: Attachment[]
 }
 
 export type EpicStatus = 'planning' | 'active' | 'completed' | 'archived'
@@ -77,6 +117,7 @@ export interface Epic {
   targetDate: number | null
   createdAt: number
   updatedAt: number
+  attachments?: Attachment[]
 }
 
 export interface Column {

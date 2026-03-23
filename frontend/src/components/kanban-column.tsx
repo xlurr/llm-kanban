@@ -43,6 +43,18 @@ export function KanbanColumn({ column, tasks, epicMap, dragHighlight = null, isD
         !isDragging && isOver && 'bg-foreground/[0.02] dark:bg-primary/[0.04] border-foreground/10 dark:border-primary/20 shadow-lg shadow-foreground/5 dark:shadow-primary/5 scale-[1.01]'
       )}
     >
+      {/* Animated top accent */}
+      <div className="h-0.5 mx-3 mt-2 rounded-full overflow-hidden">
+        <div
+          className="h-full rounded-full transition-all duration-500"
+          style={{
+            backgroundColor: column.color,
+            width: tasks.length > 0 ? '100%' : '30%',
+            opacity: tasks.length > 0 ? 0.6 : 0.2,
+          }}
+        />
+      </div>
+
       <div className="flex items-center justify-between p-3 pb-1">
         <div className="flex items-center gap-2">
           <DynamicIcon name={column.icon} className="h-[18px] w-[18px] text-muted-foreground" />
