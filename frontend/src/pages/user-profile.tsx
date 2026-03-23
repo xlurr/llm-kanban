@@ -16,6 +16,7 @@ import {
   ListChecks, CheckCircle2, AlertCircle, Clock,
 } from 'lucide-react'
 import { DynamicIcon } from '@/components/ui/dynamic-icon'
+import { PageHero } from '@/components/page-hero'
 import { cn } from '@/lib/utils'
 
 const roleLabels: Record<string, string> = {
@@ -107,48 +108,46 @@ export function UserProfilePage() {
       </div>
 
       {/* Profile card */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-start gap-6">
-            <div className="h-20 w-20 rounded-2xl bg-foreground/5 dark:bg-primary/10 text-foreground/70 dark:text-primary/70 text-2xl font-bold flex items-center justify-center shrink-0">
-              {profileUser.avatar}
-            </div>
-            <div className="flex-1 min-w-0 space-y-3">
-              {editing ? (
-                <div className="space-y-3">
-                  <Input value={editName} onChange={(e) => setEditName(e.target.value)}
-                    className="text-xl h-12 font-bold" placeholder="Имя" />
-                  <Input value={editPosition} onChange={(e) => setEditPosition(e.target.value)}
-                    className="h-9" placeholder="Должность" />
-                  <Textarea value={editBio} onChange={(e) => setEditBio(e.target.value)}
-                    rows={3} placeholder="О себе..." />
-                </div>
-              ) : (
-                <>
-                  <div>
-                    <h1 className="text-2xl font-bold">{profileUser.name}</h1>
-                    {profileUser.position && (
-                      <p className="text-muted-foreground">{profileUser.position}</p>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                    <Badge variant="outline" className={cn('border', roleBadgeColors[profileUser.role])}>
-                      {roleLabels[profileUser.role]}
-                    </Badge>
-                    <span className="flex items-center gap-1.5">
-                      <Mail className="h-3.5 w-3.5" /> {profileUser.email}
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <Calendar className="h-3.5 w-3.5" /> С {new Date(profileUser.joinedAt).toLocaleDateString('ru-RU')}
-                    </span>
-                  </div>
-                  {profileUser.bio && <p className="text-sm">{profileUser.bio}</p>}
-                </>
-              )}
-            </div>
+      <PageHero theme="rose" compact>
+        <div className="flex items-start gap-6">
+          <div className="h-20 w-20 rounded-2xl bg-background/60 dark:bg-card/60 backdrop-blur-sm text-foreground/70 text-2xl font-bold flex items-center justify-center shrink-0 border border-border/50 shadow-sm">
+            {profileUser.avatar}
           </div>
-        </CardContent>
-      </Card>
+          <div className="flex-1 min-w-0 space-y-3">
+            {editing ? (
+              <div className="space-y-3">
+                <Input value={editName} onChange={(e) => setEditName(e.target.value)}
+                  className="text-xl h-12 font-bold bg-background/80" placeholder="Имя" />
+                <Input value={editPosition} onChange={(e) => setEditPosition(e.target.value)}
+                  className="h-9 bg-background/80" placeholder="Должность" />
+                <Textarea value={editBio} onChange={(e) => setEditBio(e.target.value)}
+                  rows={3} placeholder="О себе..." className="bg-background/80" />
+              </div>
+            ) : (
+              <>
+                <div>
+                  <h1 className="text-2xl font-bold">{profileUser.name}</h1>
+                  {profileUser.position && (
+                    <p className="text-muted-foreground">{profileUser.position}</p>
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                  <Badge variant="outline" className={cn('border', roleBadgeColors[profileUser.role])}>
+                    {roleLabels[profileUser.role]}
+                  </Badge>
+                  <span className="flex items-center gap-1.5">
+                    <Mail className="h-3.5 w-3.5" /> {profileUser.email}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Calendar className="h-3.5 w-3.5" /> С {new Date(profileUser.joinedAt).toLocaleDateString('ru-RU')}
+                  </span>
+                </div>
+                {profileUser.bio && <p className="text-sm">{profileUser.bio}</p>}
+              </>
+            )}
+          </div>
+        </div>
+      </PageHero>
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-4">

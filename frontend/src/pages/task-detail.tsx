@@ -19,6 +19,7 @@ import {
   Save, X, Pencil, User, Bot, Tag, Flame,
 } from 'lucide-react'
 import { DynamicIcon } from '@/components/ui/dynamic-icon'
+import { PageHero } from '@/components/page-hero'
 import { cn } from '@/lib/utils'
 import type { TaskPriority } from '@/lib/types'
 
@@ -175,9 +176,9 @@ export function TaskDetailPage() {
       </div>
 
       {/* Title & meta — editable */}
-      <Card>
-        <div className="h-1.5" style={{ backgroundColor: editing ? editColor : task.color }} />
-        <CardContent className="pt-5 space-y-3">
+      <PageHero theme="blue" compact>
+        <div className="h-1.5 rounded-full mb-4 w-16" style={{ backgroundColor: editing ? editColor : task.color }} />
+        <div className="space-y-3">
           {editing ? (
             <div className="space-y-4">
               <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="text-lg h-12 font-semibold" />
@@ -269,8 +270,8 @@ export function TaskDetailPage() {
               </div>
             </>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </PageHero>
 
       {/* Info cards */}
       {!editing && (

@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTasksStore } from '@/stores/tasks-store'
 import { useAgentsStore } from '@/stores/agents-store'
@@ -12,9 +12,14 @@ import { Progress } from '@/components/ui/progress'
 import {
   ListChecks, CheckCircle2, AlertTriangle, Clock, TrendingUp,
   Star, Activity, Flame, CalendarClock, Tag, Bot, Users,
-  ArrowUpRight, ArrowDownRight, Minus,
+  ArrowUpRight, ArrowDownRight, Minus, Zap, Cpu, Shield, Eye,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import {
+  AreaChart, Area, BarChart as RBarChart, Bar, RadialBarChart, RadialBar,
+  PieChart, Pie, Cell, LineChart, Line, ResponsiveContainer,
+  XAxis, YAxis, Tooltip, CartesianGrid,
+} from 'recharts'
 
 // ── Helpers ──
 
@@ -42,88 +47,222 @@ const priorityLabels: Record<string, string> = {
   critical: 'Критический',
 }
 
-// ── Mini bar chart (pure CSS) ──
+// ── Animated Robot SVG ──
 
-function BarChart({ data, maxValue }: { data: { label: string; value: number; color: string }[]; maxValue?: number }) {
-  const max = maxValue || Math.max(...data.map((d) => d.value), 1)
+function AnimatedRobot() {
   return (
-    <div className="space-y-2">
-      {data.map((d) => (
-        <div key={d.label} className="flex items-center gap-3">
-          <span className="text-xs text-muted-foreground w-20 truncate text-right">{d.label}</span>
-          <div className="flex-1 h-5 bg-muted rounded-full overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all duration-700"
-              style={{ width: `${(d.value / max) * 100}%`, backgroundColor: d.color }}
-            />
-          </div>
-          <span className="text-xs font-medium w-6 text-right">{d.value}</span>
-        </div>
+    <div className="relative w-[280px] h-[280px] select-none">
+      {/* Glow backdrop */}
+      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-violet-500/20 via-cyan-500/10 to-transparent blur-3xl animate-pulse" />
+
+      <svg viewBox="0 0 280 280" className="w-full h-full relative z-10">
+        <defs>
+          {/* Gradients */}
+          <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#8b5cf6" />
+            <stop offset="100%" stopColor="#6d28d9" />
+          </linearGradient>
+          <linearGradient id="headGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#a78bfa" />
+            <stop offset="100%" stopColor="#7c3aed" />
+          </linearGradient>
+          <linearGradient id="screenGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#0f172a" />
+            <stop offset="100%" stopColor="#1e293b" />
+          </linearGradient>
+          <linearGradient id="armGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#7c3aed" />
+            <stop offset="100%" stopColor="#5b21b6" />
+          </linearGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+          <filter id="softShadow">
+            <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="#0008" />
+          </filter>
+        </defs>
+
+        {/* Shadow on ground */}
+        <ellipse cx="140" cy="265" rx="60" ry="8" fill="#0002" />
+
+        {/* Legs */}
+        <rect x="108" y="210" width="18" height="40" rx="6" fill="url(#armGrad)" />
+        <rect x="154" y="210" width="18" height="40" rx="6" fill="url(#armGrad)" />
+        {/* Feet */}
+        <rect x="102" y="244" width="30" height="12" rx="6" fill="#5b21b6" />
+        <rect x="148" y="244" width="30" height="12" rx="6" fill="#5b21b6" />
+
+        {/* Body */}
+        <rect x="90" y="130" width="100" height="90" rx="20" fill="url(#bodyGrad)" filter="url(#softShadow)" />
+        {/* Chest screen */}
+        <rect x="105" y="145" width="70" height="45" rx="10" fill="url(#screenGrad)" />
+        {/* Chest bars animated */}
+        <g>
+          <rect x="113" y="168" width="8" height="14" rx="2" fill="#22d3ee" opacity="0.9">
+            <animate attributeName="height" values="14;8;14" dur="1.5s" repeatCount="indefinite" />
+            <animate attributeName="y" values="168;174;168" dur="1.5s" repeatCount="indefinite" />
+          </rect>
+          <rect x="125" y="162" width="8" height="20" rx="2" fill="#34d399" opacity="0.9">
+            <animate attributeName="height" values="20;10;20" dur="1.8s" repeatCount="indefinite" />
+            <animate attributeName="y" values="162;172;162" dur="1.8s" repeatCount="indefinite" />
+          </rect>
+          <rect x="137" y="165" width="8" height="17" rx="2" fill="#a78bfa" opacity="0.9">
+            <animate attributeName="height" values="17;6;17" dur="1.3s" repeatCount="indefinite" />
+            <animate attributeName="y" values="165;176;165" dur="1.3s" repeatCount="indefinite" />
+          </rect>
+          <rect x="149" y="160" width="8" height="22" rx="2" fill="#f472b6" opacity="0.9">
+            <animate attributeName="height" values="22;12;22" dur="2s" repeatCount="indefinite" />
+            <animate attributeName="y" values="160;170;160" dur="2s" repeatCount="indefinite" />
+          </rect>
+          <rect x="161" y="166" width="8" height="16" rx="2" fill="#fbbf24" opacity="0.9">
+            <animate attributeName="height" values="16;7;16" dur="1.6s" repeatCount="indefinite" />
+            <animate attributeName="y" values="166;175;166" dur="1.6s" repeatCount="indefinite" />
+          </rect>
+        </g>
+        {/* Chest heart / power indicator */}
+        <circle cx="140" cy="152" r="3" fill="#22d3ee" filter="url(#glow)">
+          <animate attributeName="r" values="3;4;3" dur="2s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="1;0.6;1" dur="2s" repeatCount="indefinite" />
+        </circle>
+
+        {/* Left arm */}
+        <g>
+          <rect x="62" y="140" width="20" height="55" rx="10" fill="url(#armGrad)">
+            <animateTransform attributeName="transform" type="rotate" values="0 72 140;-8 72 140;0 72 140" dur="3s" repeatCount="indefinite" />
+          </rect>
+          {/* Left hand */}
+          <circle cx="72" cy="200" r="10" fill="#7c3aed">
+            <animateTransform attributeName="transform" type="rotate" values="0 72 140;-8 72 140;0 72 140" dur="3s" repeatCount="indefinite" />
+          </circle>
+        </g>
+        {/* Right arm */}
+        <g>
+          <rect x="198" y="140" width="20" height="55" rx="10" fill="url(#armGrad)">
+            <animateTransform attributeName="transform" type="rotate" values="0 208 140;8 208 140;0 208 140" dur="3s" repeatCount="indefinite" begin="0.3s" />
+          </rect>
+          <circle cx="208" cy="200" r="10" fill="#7c3aed">
+            <animateTransform attributeName="transform" type="rotate" values="0 208 140;8 208 140;0 208 140" dur="3s" repeatCount="indefinite" begin="0.3s" />
+          </circle>
+        </g>
+
+        {/* Neck */}
+        <rect x="127" y="110" width="26" height="25" rx="8" fill="#6d28d9" />
+
+        {/* Head */}
+        <rect x="88" y="35" width="104" height="85" rx="24" fill="url(#headGrad)" filter="url(#softShadow)" />
+
+        {/* Antenna */}
+        <line x1="140" y1="35" x2="140" y2="12" stroke="#a78bfa" strokeWidth="3" strokeLinecap="round" />
+        <circle cx="140" cy="10" r="6" fill="#22d3ee" filter="url(#glow)">
+          <animate attributeName="fill" values="#22d3ee;#f472b6;#fbbf24;#22d3ee" dur="4s" repeatCount="indefinite" />
+        </circle>
+
+        {/* Eyes */}
+        <g>
+          {/* Left eye */}
+          <ellipse cx="118" cy="70" rx="14" ry="16" fill="#0f172a" />
+          <ellipse cx="118" cy="70" rx="10" ry="12" fill="#1e293b" />
+          <circle cx="118" cy="68" r="6" fill="#22d3ee" filter="url(#glow)">
+            <animate attributeName="cy" values="68;70;68" dur="3s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="121" cy="65" r="2" fill="#fff" opacity="0.8" />
+
+          {/* Right eye */}
+          <ellipse cx="162" cy="70" rx="14" ry="16" fill="#0f172a" />
+          <ellipse cx="162" cy="70" rx="10" ry="12" fill="#1e293b" />
+          <circle cx="162" cy="68" r="6" fill="#22d3ee" filter="url(#glow)">
+            <animate attributeName="cy" values="68;70;68" dur="3s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="165" cy="65" r="2" fill="#fff" opacity="0.8" />
+        </g>
+
+        {/* Mouth — smile */}
+        <path d="M122 92 Q140 104 158 92" fill="none" stroke="#0f172a" strokeWidth="3" strokeLinecap="round" />
+
+        {/* Ear panels */}
+        <rect x="76" y="55" width="12" height="30" rx="6" fill="#6d28d9" />
+        <rect x="192" y="55" width="12" height="30" rx="6" fill="#6d28d9" />
+
+        {/* Floating particles */}
+        <circle cx="50" cy="50" r="2" fill="#22d3ee" opacity="0.6">
+          <animate attributeName="cy" values="50;30;50" dur="4s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.6;0;0.6" dur="4s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="230" cy="40" r="1.5" fill="#a78bfa" opacity="0.5">
+          <animate attributeName="cy" values="40;20;40" dur="3.5s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.5;0;0.5" dur="3.5s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="45" cy="120" r="1.5" fill="#f472b6" opacity="0.4">
+          <animate attributeName="cy" values="120;100;120" dur="5s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.4;0;0.4" dur="5s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="235" cy="130" r="2" fill="#fbbf24" opacity="0.5">
+          <animate attributeName="cy" values="130;110;130" dur="3s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.5;0;0.5" dur="3s" repeatCount="indefinite" />
+        </circle>
+      </svg>
+    </div>
+  )
+}
+
+// ── Animated counter ──
+
+function AnimatedNumber({ value, duration = 1200 }: { value: number; duration?: number }) {
+  const [display, setDisplay] = useState(0)
+  useEffect(() => {
+    if (value === 0) { setDisplay(0); return }
+    const start = performance.now()
+    const from = 0
+    const step = (now: number) => {
+      const progress = Math.min((now - start) / duration, 1)
+      const eased = 1 - Math.pow(1 - progress, 3)
+      setDisplay(Math.round(from + (value - from) * eased))
+      if (progress < 1) requestAnimationFrame(step)
+    }
+    requestAnimationFrame(step)
+  }, [value, duration])
+  return <>{display}</>
+}
+
+// ── Minimal recharts tooltip ──
+
+function MiniTooltip({ active, payload, label }: any) {
+  if (!active || !payload?.length) return null
+  return (
+    <div className="bg-popover/95 backdrop-blur-sm border border-border rounded-lg px-3 py-2 shadow-xl text-xs">
+      {label && <p className="text-muted-foreground mb-1">{label}</p>}
+      {payload.map((p: any, i: number) => (
+        <p key={i} className="font-medium" style={{ color: p.color }}>{p.name}: {p.value}</p>
       ))}
     </div>
   )
 }
 
-// ── Donut chart (SVG) ──
+// ── Floating status cards for hero ──
 
-function DonutChart({ segments, size = 120 }: { segments: { value: number; color: string; label: string }[]; size?: number }) {
-  const total = segments.reduce((s, d) => s + d.value, 0)
-  if (total === 0) return <div className="flex items-center justify-center" style={{ width: size, height: size }}><span className="text-xs text-muted-foreground">Нет данных</span></div>
-
-  const r = (size - 16) / 2
-  const cx = size / 2
-  const cy = size / 2
-  const circumference = 2 * Math.PI * r
-  let offset = 0
-
+function FloatingCard({ icon: Icon, label, value, color, delay, className }: {
+  icon: any; label: string; value: string; color: string; delay: string; className?: string
+}) {
   return (
-    <svg width={size} height={size} className="shrink-0">
-      {segments.filter((s) => s.value > 0).map((seg) => {
-        const pct = seg.value / total
-        const dash = pct * circumference
-        const gap = circumference - dash
-        const currentOffset = offset
-        offset += dash
-        return (
-          <circle
-            key={seg.label}
-            cx={cx} cy={cy} r={r}
-            fill="none"
-            stroke={seg.color}
-            strokeWidth={10}
-            strokeDasharray={`${dash} ${gap}`}
-            strokeDashoffset={-currentOffset}
-            strokeLinecap="round"
-            className="transition-all duration-700"
-            style={{ transform: 'rotate(-90deg)', transformOrigin: `${cx}px ${cy}px` }}
-          />
-        )
-      })}
-      <text x={cx} y={cy - 6} textAnchor="middle" className="fill-foreground text-xl font-bold">{total}</text>
-      <text x={cx} y={cy + 12} textAnchor="middle" className="fill-muted-foreground text-[10px]">задач</text>
-    </svg>
-  )
-}
-
-// ── Sparkline (SVG) ──
-
-function Sparkline({ data, color = 'currentColor', height = 40, width = 120 }: { data: number[]; color?: string; height?: number; width?: number }) {
-  if (data.length < 2) return null
-  const max = Math.max(...data, 1)
-  const min = Math.min(...data, 0)
-  const range = max - min || 1
-  const points = data.map((v, i) => {
-    const x = (i / (data.length - 1)) * width
-    const y = height - ((v - min) / range) * (height - 4) - 2
-    return `${x},${y}`
-  }).join(' ')
-  const areaPoints = `0,${height} ${points} ${width},${height}`
-
-  return (
-    <svg width={width} height={height} className="shrink-0">
-      <polyline points={areaPoints} fill={color} fillOpacity={0.1} stroke="none" />
-      <polyline points={points} fill="none" stroke={color} strokeWidth={1.5} strokeLinejoin="round" strokeLinecap="round" />
-    </svg>
+    <div
+      className={cn(
+        'absolute bg-card/80 backdrop-blur-md border border-border/50 rounded-xl px-4 py-3 shadow-lg',
+        'animate-float',
+        className,
+      )}
+      style={{ animationDelay: delay }}
+    >
+      <div className="flex items-center gap-2.5">
+        <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: color + '20' }}>
+          <Icon className="h-4 w-4" style={{ color }} />
+        </div>
+        <div>
+          <p className="text-[10px] text-muted-foreground">{label}</p>
+          <p className="text-sm font-bold">{value}</p>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -174,7 +313,7 @@ export function DashboardPage() {
   const priorityData = useMemo(() => {
     const pris = ['low', 'medium', 'high', 'critical'] as const
     return pris.map((p) => ({
-      label: priorityLabels[p],
+      name: priorityLabels[p],
       value: tasks.filter((t) => t.priority === p).length,
       color: p === 'low' ? '#22c55e' : p === 'medium' ? '#3b82f6' : p === 'high' ? '#f97316' : '#ef4444',
     }))
@@ -189,7 +328,7 @@ export function DashboardPage() {
       .slice(0, 12)
   }, [tasks])
 
-  // Most active users (by tasks created + comments)
+  // Most active users
   const activeUsers = useMemo(() => {
     const map = new Map<string, { created: number; comments: number }>()
     tasks.forEach((t) => {
@@ -225,7 +364,7 @@ export function DashboardPage() {
     [agents, tasks]
   )
 
-  // Recent activity (logs + comments merged)
+  // Recent activity
   const recentActivity = useMemo(() => {
     const items: { type: 'log' | 'comment'; message: string; taskTitle: string; taskId: string; timestamp: number; logType?: string; author?: string }[] = []
     tasks.forEach((t) => {
@@ -256,22 +395,27 @@ export function DashboardPage() {
     [epics, tasks]
   )
 
-  // Task creation sparkline (last 14 days)
-  const creationSparkline = useMemo(() => {
+  // Task creation chart (last 14 days)
+  const creationChart = useMemo(() => {
     const DAY = 86400000
     const days = 14
-    const data: number[] = []
+    const data: { day: string; tasks: number; done: number }[] = []
     for (let i = days - 1; i >= 0; i--) {
       const start = Date.now() - (i + 1) * DAY
       const end = Date.now() - i * DAY
-      data.push(tasks.filter((t) => t.createdAt >= start && t.createdAt < end).length)
+      const date = new Date(end)
+      data.push({
+        day: `${date.getDate()}.${date.getMonth() + 1}`,
+        tasks: tasks.filter((t) => t.createdAt >= start && t.createdAt < end).length,
+        done: tasks.filter((t) => t.status === 'done' && t.createdAt >= start && t.createdAt < end).length,
+      })
     }
     return data
   }, [tasks])
 
   // Score distribution
   const scoreDistribution = useMemo(() => {
-    const bins = Array.from({ length: 10 }, (_, i) => ({ score: i + 1, count: 0 }))
+    const bins = Array.from({ length: 10 }, (_, i) => ({ score: `${i + 1}`, count: 0 }))
     tasks.forEach((t) => {
       if (t.review) {
         const idx = Math.min(t.review.score - 1, 9)
@@ -281,41 +425,134 @@ export function DashboardPage() {
     return bins
   }, [tasks])
 
+  // Agent radial data
+  const agentRadial = useMemo(() =>
+    agents.map((a, i) => ({
+      name: a.name,
+      value: a.successRate,
+      fill: ['#8b5cf6', '#22d3ee', '#f472b6', '#fbbf24', '#34d399', '#f97316'][i % 6],
+    })),
+    [agents]
+  )
+
+  // Workload by hour (simulated from task creation timestamps)
+  const heatmapData = useMemo(() => {
+    const hours = Array.from({ length: 24 }, (_, i) => ({ hour: `${i}:00`, value: 0 }))
+    tasks.forEach((t) => {
+      const h = new Date(t.createdAt).getHours()
+      hours[h].value++
+    })
+    return hours
+  }, [tasks])
+
   return (
     <div className="space-y-6" data-tour="dashboard-page">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Дашборд</h1>
-        <p className="text-sm text-muted-foreground">{new Date().toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+
+      {/* ── Hero Section with Robot ── */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-50 via-background to-indigo-50/30 dark:from-violet-950/50 dark:via-background dark:to-cyan-950/30 border border-border/50 p-8 min-h-[320px]">
+        {/* Background grid pattern */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: 'linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)',
+          backgroundSize: '40px 40px',
+        }} />
+
+        {/* Animated gradient orbs */}
+        <div className="absolute top-10 left-10 w-72 h-72 bg-violet-200/30 dark:bg-violet-500/10 rounded-full blur-[100px] animate-pulse" />
+        <div className="absolute bottom-0 right-20 w-96 h-96 bg-indigo-200/20 dark:bg-cyan-500/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
+
+        <div className="relative z-10 flex items-center justify-between gap-8">
+          <div className="flex-1 space-y-4 max-w-lg">
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-xs text-green-500 font-medium tracking-wide uppercase">Система активна</span>
+            </div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-foreground via-foreground to-violet-400 bg-clip-text text-transparent">
+              LLM Kanban
+            </h1>
+            <p className="text-muted-foreground leading-relaxed">
+              Оркестрация задач для AI-агентов. Создавайте задачи с промптами,
+              назначайте агентов, отслеживайте результаты в реальном времени.
+            </p>
+
+            {/* Quick stats row */}
+            <div className="flex items-center gap-6 pt-2">
+              <div>
+                <p className="text-2xl font-bold"><AnimatedNumber value={stats.total} /></p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Задач</p>
+              </div>
+              <div className="h-8 w-px bg-border" />
+              <div>
+                <p className="text-2xl font-bold text-green-500"><AnimatedNumber value={stats.done} /></p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Готово</p>
+              </div>
+              <div className="h-8 w-px bg-border" />
+              <div>
+                <p className="text-2xl font-bold text-violet-500"><AnimatedNumber value={agents.filter(a => a.status !== 'offline').length} /></p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Агентов</p>
+              </div>
+              <div className="h-8 w-px bg-border" />
+              <div>
+                <p className="text-2xl font-bold text-cyan-500">{stats.avgScore.toFixed(1)}</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Ср. оценка</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Robot */}
+          <div className="relative hidden lg:block -ml-8">
+            <AnimatedRobot />
+
+            {/* Floating status cards around robot */}
+            <FloatingCard
+              icon={Zap} label="Скорость" value="1.2x"
+              color="#fbbf24" delay="0s"
+              className="top-0 -left-24"
+            />
+            <FloatingCard
+              icon={Shield} label="Успешность" value={`${agents[0]?.successRate || 95}%`}
+              color="#22c55e" delay="0.5s"
+              className="top-16 -right-20"
+            />
+            <FloatingCard
+              icon={Eye} label="Мониторинг" value="24/7"
+              color="#8b5cf6" delay="1s"
+              className="bottom-12 -left-16"
+            />
+          </div>
+        </div>
       </div>
 
-      {/* ── Row 1: Summary stats ── */}
+      {/* ── Row 1: KPI Cards ── */}
       <div data-tour="dashboard-stats" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="group hover:shadow-lg hover:shadow-violet-500/5 transition-all duration-300">
           <CardContent className="pt-5 pb-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">Всего задач</p>
-                <p className="text-3xl font-bold mt-1">{stats.total}</p>
+                <p className="text-3xl font-bold mt-1"><AnimatedNumber value={stats.total} /></p>
               </div>
-              <div className="h-12 w-12 rounded-xl bg-foreground/5 dark:bg-primary/10 flex items-center justify-center">
+              <div className="h-12 w-12 rounded-xl bg-foreground/5 dark:bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <ListChecks className="h-6 w-6 text-muted-foreground" />
               </div>
             </div>
-            <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground">
-              <Sparkline data={creationSparkline} color="hsl(var(--foreground))" width={80} height={24} />
-              <span>за 14 дней</span>
+            <div className="mt-3 h-8">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={creationChart}>
+                  <Area type="monotone" dataKey="tasks" stroke="hsl(var(--foreground))" fill="hsl(var(--foreground))" fillOpacity={0.08} strokeWidth={1.5} dot={false} />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="group hover:shadow-lg hover:shadow-green-500/5 transition-all duration-300">
           <CardContent className="pt-5 pb-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">Завершено</p>
-                <p className="text-3xl font-bold mt-1">{stats.done}<span className="text-sm text-muted-foreground font-normal">/{stats.total}</span></p>
+                <p className="text-3xl font-bold mt-1"><AnimatedNumber value={stats.done} /><span className="text-sm text-muted-foreground font-normal">/{stats.total}</span></p>
               </div>
-              <div className="h-12 w-12 rounded-xl bg-green-500/10 flex items-center justify-center">
+              <div className="h-12 w-12 rounded-xl bg-green-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <CheckCircle2 className="h-6 w-6 text-green-500" />
               </div>
             </div>
@@ -326,14 +563,14 @@ export function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="group hover:shadow-lg hover:shadow-yellow-500/5 transition-all duration-300">
           <CardContent className="pt-5 pb-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">Средняя оценка</p>
                 <p className="text-3xl font-bold mt-1">{stats.avgScore.toFixed(1)}<span className="text-sm text-muted-foreground font-normal">/10</span></p>
               </div>
-              <div className="h-12 w-12 rounded-xl bg-yellow-500/10 flex items-center justify-center">
+              <div className="h-12 w-12 rounded-xl bg-yellow-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Star className="h-6 w-6 text-yellow-500" />
               </div>
             </div>
@@ -341,14 +578,14 @@ export function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="group hover:shadow-lg hover:shadow-red-500/5 transition-all duration-300">
           <CardContent className="pt-5 pb-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground">Просрочено</p>
-                <p className={cn('text-3xl font-bold mt-1', stats.overdue > 0 && 'text-destructive')}>{stats.overdue}</p>
+                <p className={cn('text-3xl font-bold mt-1', stats.overdue > 0 && 'text-destructive')}><AnimatedNumber value={stats.overdue} /></p>
               </div>
-              <div className={cn('h-12 w-12 rounded-xl flex items-center justify-center', stats.overdue > 0 ? 'bg-red-500/10' : 'bg-foreground/5 dark:bg-primary/10')}>
+              <div className={cn('h-12 w-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform', stats.overdue > 0 ? 'bg-red-500/10' : 'bg-foreground/5 dark:bg-primary/10')}>
                 <AlertTriangle className={cn('h-6 w-6', stats.overdue > 0 ? 'text-red-500' : 'text-muted-foreground')} />
               </div>
             </div>
@@ -357,28 +594,159 @@ export function DashboardPage() {
         </Card>
       </div>
 
-      {/* ── Row 2: Column distribution + Priority donut ── */}
+      {/* ── Row 2: Activity Area Chart + Priority Pie ── */}
       <div data-tour="dashboard-charts" className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Activity className="h-4 w-4" /> Активность за 14 дней
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-52">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={creationChart}>
+                  <defs>
+                    <linearGradient id="gradTasks" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.3} />
+                      <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="gradDone" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#22c55e" stopOpacity={0.3} />
+                      <stop offset="100%" stopColor="#22c55e" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
+                  <XAxis dataKey="day" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={30} />
+                  <Tooltip content={<MiniTooltip />} />
+                  <Area type="monotone" dataKey="tasks" name="Создано" stroke="#8b5cf6" fill="url(#gradTasks)" strokeWidth={2} dot={false} />
+                  <Area type="monotone" dataKey="done" name="Завершено" stroke="#22c55e" fill="url(#gradDone)" strokeWidth={2} dot={false} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Приоритеты</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-44 flex items-center justify-center">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={priorityData}
+                    cx="50%" cy="50%"
+                    innerRadius={40} outerRadius={65}
+                    paddingAngle={4}
+                    dataKey="value"
+                    strokeWidth={0}
+                  >
+                    {priorityData.map((entry, i) => (
+                      <Cell key={i} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<MiniTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs mt-1">
+              {priorityData.map((p) => (
+                <div key={p.name} className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: p.color }} />
+                  <span className="text-muted-foreground">{p.name}</span>
+                  <span className="font-medium ml-auto">{p.value}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* ── Row 3: Column distribution bar chart + Score distribution ── */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader className="pb-2">
             <CardTitle className="text-base">Распределение по столбцам</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {columnData.map((col) => (
-                <div key={col.id} className="flex items-center gap-3">
-                  <div className="flex items-center gap-2 w-32 shrink-0">
-                    <DynamicIcon name={col.icon} className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm truncate">{col.label}</span>
-                  </div>
-                  <div className="flex-1 h-6 bg-muted rounded-md overflow-hidden">
-                    <div
-                      className="h-full rounded-md transition-all duration-700 flex items-center justify-end pr-2"
-                      style={{ width: `${Math.max((col.value / (stats.total || 1)) * 100, col.value > 0 ? 8 : 0)}%`, backgroundColor: col.color }}
-                    >
-                      {col.value > 0 && <span className="text-[10px] font-bold text-white drop-shadow-sm">{col.value}</span>}
-                    </div>
-                  </div>
+            <div className="h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <RBarChart data={columnData} layout="vertical" barCategoryGap="20%">
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} horizontal={false} />
+                  <XAxis type="number" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                  <YAxis type="category" dataKey="label" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={90} />
+                  <Tooltip content={<MiniTooltip />} />
+                  <Bar dataKey="value" name="Задач" radius={[0, 6, 6, 0]}>
+                    {columnData.map((entry, i) => (
+                      <Cell key={i} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </RBarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Star className="h-4 w-4" /> Распределение оценок
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-40">
+              <ResponsiveContainer width="100%" height="100%">
+                <RBarChart data={scoreDistribution} barCategoryGap="15%">
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} vertical={false} />
+                  <XAxis dataKey="score" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={25} />
+                  <Tooltip content={<MiniTooltip />} />
+                  <Bar dataKey="count" name="Ревью" radius={[4, 4, 0, 0]}>
+                    {scoreDistribution.map((entry, i) => (
+                      <Cell key={i} fill={i < 3 ? '#ef4444' : i < 6 ? '#fbbf24' : '#22c55e'} fillOpacity={0.8} />
+                    ))}
+                  </Bar>
+                </RBarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
+              <span>Всего ревью: {stats.reviewed}</span>
+              <span className="font-medium text-foreground">Средняя: {stats.avgScore.toFixed(1)}/10</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* ── Row 4: Agent radial chart + Workload heatmap ── */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Bot className="h-4 w-4" /> Успешность агентов
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-52">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadialBarChart cx="50%" cy="50%" innerRadius="20%" outerRadius="90%" data={agentRadial} startAngle={180} endAngle={-180}>
+                  <RadialBar
+                    dataKey="value"
+                    cornerRadius={6}
+                    background={{ fill: 'hsl(var(--muted))' }}
+                  />
+                  <Tooltip content={<MiniTooltip />} />
+                </RadialBarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex flex-wrap gap-3 justify-center text-xs mt-1">
+              {agentRadial.map((a) => (
+                <div key={a.name} className="flex items-center gap-1.5">
+                  <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: a.fill }} />
+                  <span className="text-muted-foreground">{a.name}</span>
+                  <span className="font-medium">{a.value}%</span>
                 </div>
               ))}
             </div>
@@ -386,27 +754,32 @@ export function DashboardPage() {
         </Card>
 
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Приоритеты</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Cpu className="h-4 w-4" /> Нагрузка по часам
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col items-center gap-4">
-              <DonutChart segments={priorityData} size={130} />
-              <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-xs">
-                {priorityData.map((p) => (
-                  <div key={p.label} className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: p.color }} />
-                    <span className="text-muted-foreground">{p.label}</span>
-                    <span className="font-medium ml-auto">{p.value}</span>
-                  </div>
-                ))}
-              </div>
+            <div className="h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <RBarChart data={heatmapData} barCategoryGap="10%">
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} vertical={false} />
+                  <XAxis dataKey="hour" tick={{ fontSize: 8, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} interval={2} />
+                  <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} width={25} />
+                  <Tooltip content={<MiniTooltip />} />
+                  <Bar dataKey="value" name="Задач" radius={[3, 3, 0, 0]}>
+                    {heatmapData.map((entry, i) => (
+                      <Cell key={i} fill={`hsl(${260 - (entry.value * 20)}, 70%, ${55 + Math.max(0, 30 - entry.value * 5)}%)`} />
+                    ))}
+                  </Bar>
+                </RBarChart>
+              </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* ── Row 3: Active tasks + Upcoming deadlines ── */}
+      {/* ── Row 5: Active tasks + Upcoming deadlines ── */}
       <div data-tour="dashboard-active" className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader className="pb-3">
@@ -484,7 +857,7 @@ export function DashboardPage() {
         </Card>
       </div>
 
-      {/* ── Row 4: Agent performance + Epic progress ── */}
+      {/* ── Row 6: Agent performance + Epic progress ── */}
       <div data-tour="dashboard-performance" className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader className="pb-3">
@@ -569,12 +942,12 @@ export function DashboardPage() {
         </Card>
       </div>
 
-      {/* ── Row 5: Most active users + Score distribution ── */}
-      <div data-tour="dashboard-users" className="grid gap-6 lg:grid-cols-2">
+      {/* ── Row 7: Users + Tags + Timeline ── */}
+      <div data-tour="dashboard-extras" className="grid gap-6 lg:grid-cols-3">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <Users className="h-4 w-4" /> Самые активные пользователи
+              <Users className="h-4 w-4" /> Активные пользователи
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -605,44 +978,6 @@ export function DashboardPage() {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <Star className="h-4 w-4" /> Распределение оценок
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-end gap-1.5 h-32 mb-3">
-              {scoreDistribution.map((bin) => {
-                const maxCount = Math.max(...scoreDistribution.map((b) => b.count), 1)
-                const heightPct = (bin.count / maxCount) * 100
-                const color = bin.score <= 3 ? 'bg-red-500/70' : bin.score <= 6 ? 'bg-yellow-500/70' : 'bg-green-500/70'
-                return (
-                  <div key={bin.score} className="flex-1 flex flex-col items-center gap-1">
-                    <span className="text-[10px] text-muted-foreground">{bin.count || ''}</span>
-                    <div
-                      className={cn('w-full rounded-t-sm transition-all duration-500', color)}
-                      style={{ height: `${Math.max(heightPct, bin.count > 0 ? 8 : 2)}%` }}
-                    />
-                  </div>
-                )
-              })}
-            </div>
-            <div className="flex gap-1.5">
-              {scoreDistribution.map((bin) => (
-                <div key={bin.score} className="flex-1 text-center text-[10px] text-muted-foreground">{bin.score}</div>
-              ))}
-            </div>
-            <div className="flex items-center justify-between mt-4 text-xs text-muted-foreground">
-              <span>Всего ревью: {stats.reviewed}</span>
-              <span className="font-medium text-foreground">Средняя: {stats.avgScore.toFixed(1)}/10</span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* ── Row 6: Tags cloud + Quick stats ── */}
-      <div data-tour="dashboard-extras" className="grid gap-6 lg:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
               <Tag className="h-4 w-4" /> Популярные теги
             </CardTitle>
           </CardHeader>
@@ -664,17 +999,9 @@ export function DashboardPage() {
                 )
               })}
             </div>
-          </CardContent>
-        </Card>
 
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" /> Сводка
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-3">
+            {/* Mini summary */}
+            <div className="grid grid-cols-2 gap-3 mt-6">
               <div className="p-2.5 rounded-lg bg-muted/50 text-center">
                 <p className="text-lg font-bold">{stats.totalEstimate}м</p>
                 <p className="text-[10px] text-muted-foreground">Общая оценка</p>
@@ -690,14 +1017,6 @@ export function DashboardPage() {
               <div className="p-2.5 rounded-lg bg-muted/50 text-center">
                 <p className="text-lg font-bold">{stats.doneSubtasks}/{stats.totalSubtasks}</p>
                 <p className="text-[10px] text-muted-foreground">Подзадач</p>
-              </div>
-              <div className="p-2.5 rounded-lg bg-muted/50 text-center">
-                <p className="text-lg font-bold">{stats.totalLogs}</p>
-                <p className="text-[10px] text-muted-foreground">Записей в логе</p>
-              </div>
-              <div className="p-2.5 rounded-lg bg-muted/50 text-center">
-                <p className="text-lg font-bold">{agents.filter((a) => a.status !== 'offline').length}/{agents.length}</p>
-                <p className="text-[10px] text-muted-foreground">Агентов онлайн</p>
               </div>
             </div>
           </CardContent>

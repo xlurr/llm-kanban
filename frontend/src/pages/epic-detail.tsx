@@ -17,6 +17,7 @@ import {
   ArrowLeft, Trash2, CalendarClock, ListChecks,
   Plus, Save, X, Clock, Bot, Flame, TrendingUp, AlertCircle,
 } from 'lucide-react'
+import { PageHero } from '@/components/page-hero'
 import { cn } from '@/lib/utils'
 import type { EpicStatus } from '@/lib/types'
 
@@ -155,16 +156,15 @@ export function EpicDetailPage() {
       </div>
 
       {/* Epic info */}
-      <Card>
-        <div className="h-1.5" style={{ backgroundColor: editing ? color : epic.color }} />
-        <CardContent className="pt-6 space-y-4">
+      <PageHero theme="amber" compact>
+        <div className="space-y-4">
           {editing ? (
             <>
               <div className="flex items-start gap-4">
                 <IconPicker value={icon} onChange={setIcon} />
-                <Input value={name} onChange={(e) => setName(e.target.value)} className="text-lg h-12 font-semibold flex-1" />
+                <Input value={name} onChange={(e) => setName(e.target.value)} className="text-lg h-12 font-semibold flex-1 bg-background/80" />
               </div>
-              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} placeholder="Описание эпика..." />
+              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} placeholder="Описание эпика..." className="bg-background/80" />
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Статус</label>
@@ -242,8 +242,8 @@ export function EpicDetailPage() {
               </div>
             </>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </PageHero>
 
       {/* Stats cards */}
       {!editing && (

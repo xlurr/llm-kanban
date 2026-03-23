@@ -12,6 +12,7 @@ import {
   Clock, Activity, Settings2, TrendingUp,
 } from 'lucide-react'
 import { DynamicIcon } from '@/components/ui/dynamic-icon'
+import { PageHero } from '@/components/page-hero'
 import { cn } from '@/lib/utils'
 
 const statusLabels: Record<string, { label: string; class: string }> = {
@@ -65,31 +66,29 @@ export function AgentProfilePage() {
       </Button>
 
       {/* Agent header */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-start gap-6">
-            <div className="h-20 w-20 rounded-2xl bg-foreground/5 dark:bg-primary/10 text-foreground/70 dark:text-primary/70 text-2xl font-bold flex items-center justify-center shrink-0">
-              {agent.avatar}
+      <PageHero theme="cyan" compact>
+        <div className="flex items-start gap-6">
+          <div className="h-20 w-20 rounded-2xl bg-background/60 dark:bg-card/60 backdrop-blur-sm text-foreground/70 text-2xl font-bold flex items-center justify-center shrink-0 border border-border/50 shadow-sm">
+            {agent.avatar}
+          </div>
+          <div className="flex-1 space-y-3">
+            <div>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold">{agent.name}</h1>
+                <Badge variant="outline" className={cn('border', statusInfo.class)}>
+                  {statusInfo.label}
+                </Badge>
+              </div>
+              <p className="text-muted-foreground">{typeLabels[agent.type]}</p>
             </div>
-            <div className="flex-1 space-y-3">
-              <div>
-                <div className="flex items-center gap-3">
-                  <h1 className="text-2xl font-bold">{agent.name}</h1>
-                  <Badge variant="outline" className={cn('border', statusInfo.class)}>
-                    {statusInfo.label}
-                  </Badge>
-                </div>
-                <p className="text-muted-foreground">{typeLabels[agent.type]}</p>
-              </div>
-              <p className="text-sm">{agent.description}</p>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Calendar className="h-3.5 w-3.5" />
-                Создан {new Date(agent.createdAt).toLocaleDateString('ru-RU')}
-              </div>
+            <p className="text-sm">{agent.description}</p>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Calendar className="h-3.5 w-3.5" />
+              Создан {new Date(agent.createdAt).toLocaleDateString('ru-RU')}
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </PageHero>
 
       {/* Key metrics */}
       <div className="grid gap-4 md:grid-cols-4">
