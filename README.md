@@ -2,7 +2,7 @@
 
 Kanban-board for orchestrating tasks across LLM agents — Claude Code, Codex CLI, Gemini CLI and custom pipelines.
 
----
+## ![Kanban logo](docs/logo.png)
 
 ## Quick Start
 
@@ -56,6 +56,8 @@ npm install && npm run dev
 - Interactive schema viewer built on `@xyflow/react`
 - Two depth modes: table groups overview and full field-level detail
 - Hover highlights related tables; field-level search
+
+![Kanban dashboard](docs/dashboard.png)
 
 ---
 
