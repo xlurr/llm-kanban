@@ -1,6 +1,6 @@
 # LLM Kanban
 
-![logo](docs/logo.jpg)
+![logo](docs/logo.png)
 
 > Kanban-доска для оркестрации задач LLM-агентов — Claude Code, Codex CLI, Gemini CLI и кастомных пайплайнов.
 
@@ -27,7 +27,7 @@ npm install && npm run dev
 
 ## Доска
 
-![board](docs/board.jpg)
+![board](docs/board.png)
 
 Центральный рабочий экран. Задачи распределены по колонкам пайплайна — от Бэклога до Done. Карточка отображает эпик, теги, прогресс подзадач, дедлайн и назначенного агента. Колонка **Executing** имеет WIP-лимит (2/3) — при превышении новые задачи не принимаются. Drag-and-drop работает только по разрешённым переходам стейт-машины.
 
@@ -37,7 +37,7 @@ npm install && npm run dev
 
 ### Аналитика
 
-![analytics](docs/analys_dashboard.jpg)
+![analytics](docs/analys_dashboard.png)
 
 Активность за 14 дней, donut-диаграмма приоритетов, распределение задач по колонкам и гистограмма оценок ревью. Средняя оценка выполнения агентами — **8.5/10**.
 
@@ -45,7 +45,7 @@ npm install && npm run dev
 
 ### События и пользователи
 
-![events](docs/ivents_dashboard.jpg)
+![events](docs/ivents_dashboard.png)
 
 Лента последних событий с цветовой индикацией типа (success / warning / info), топ активных пользователей с рейтингом, популярные теги и агрегированные метрики по проекту.
 
@@ -53,7 +53,7 @@ npm install && npm run dev
 
 ### Метрики агентов
 
-![metrics](docs/metrics_dasboard.jpg)
+![metrics](docs/metrics_dasboard.png)
 
 Сравнение успешности по типам агентов: Claude Code **94%**, Codex CLI **87%**, Gemini CLI **81%**, Custom **75%**. График нагрузки по часам показывает пиковое время активности.
 
@@ -63,7 +63,7 @@ npm install && npm run dev
 
 ### Список эпиков
 
-![epics](docs/epics.jpg)
+![epics](docs/epics.png)
 
 Эпики с прогресс-барами и цветовой разбивкой по статусам задач. Отображаются дедлайны, процент выполнения и текущий статус — Активный / Завершён / В планах.
 
@@ -71,7 +71,7 @@ npm install && npm run dev
 
 ### Задачи внутри эпика
 
-![tasks in epics](docs/tasks_epics.jpg)
+![tasks in epics](docs/tasks_epics.png)
 
 Раскрытый эпик показывает привязанные задачи с текущим статусом прямо в строке — без перехода на доску. Неназначенные задачи проекта привязываются к эпику в один клик.
 
@@ -81,7 +81,7 @@ npm install && npm run dev
 
 ### Логи выполнения
 
-![execution logs](docs/log_task.jpg)
+![execution logs](docs/log_task.png)
 
 Лента логов агента в реальном времени. Каждое событие имеет тип (success / warning / info) и точный таймстемп — полный трейс от старта задачи до финализации.
 
@@ -89,7 +89,7 @@ npm install && npm run dev
 
 ### Ревью
 
-![review](docs/review_task.jpg)
+![review](docs/review_task.png)
 
 Авто-ревью по завершении: оценка 1–10 с визуальным индикатором, имя ревьюера, дата и текстовый комментарий. Результаты агрегируются в дашборде и профиле агента.
 
@@ -97,7 +97,7 @@ npm install && npm run dev
 
 ## Онбординг
 
-![product tour](docs/demo_func.jpg)
+![product tour](docs/demo_func.png)
 
 Встроенный интерактивный тур из 24 шагов. Запускается автоматически при первом входе — проводит по всем ключевым экранам и объясняет концепцию prompt-first workflow.
 
